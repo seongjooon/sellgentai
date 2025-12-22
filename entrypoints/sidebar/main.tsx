@@ -70,6 +70,11 @@ const SidebarApp: React.FC = () => {
   const [salePriceOverride, setSalePriceOverride] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [targetMarginRate, setTargetMarginRate] = useState<number>(() => {
+    // localStorage에서 목표 마진율 불러오기
+    const saved = localStorage.getItem('targetMarginRate');
+    return saved ? parseFloat(saved) : 20; // 기본값 20%
+  });
 
   const isCoupangSeller = useMemo(() => {
     const name = (product?.sellerName || '').trim();
@@ -129,6 +134,24 @@ const SidebarApp: React.FC = () => {
     });
   }, [salePrice, categoryFeeRate, cost, extraCost, productSize]);
 
+  // 목표 마진율 기반 추천 사입가 계산
+  const recommendedMaxCost = useMemo(() => {
+    if (salePrice === 0) return 0;
+
+    // 목표 순이익 = 판매가 × (목표 마진율 / 100)
+    const targetProfit = salePrice * (targetMarginRate / 100);
+
+    // 추천 사입가 = 판매가 - 목표 순이익 - 총 수수료 - 기타 비용
+    const recommended = salePrice - targetProfit - calculation.totalFee - extraCost;
+
+    return Math.max(0, recommended); // 음수 방지
+  }, [salePrice, targetMarginRate, calculation.totalFee, extraCost]);
+
+  // 목표 마진율 달성 여부
+  const meetsTargetMargin = useMemo(() => {
+    return calculation.marginRate >= targetMarginRate;
+  }, [calculation.marginRate, targetMarginRate]);
+
   const handleRequestScrape = () => {
     setIsLoading(true);
     setError(null);
@@ -175,6 +198,11 @@ const SidebarApp: React.FC = () => {
       setSalePriceOverride((prev) => (prev === null ? product.salePrice ?? 0 : prev));
     }
   }, [product?.salePrice]);
+
+  // 목표 마진율 변경 시 localStorage에 저장
+  useEffect(() => {
+    localStorage.setItem('targetMarginRate', targetMarginRate.toString());
+  }, [targetMarginRate]);
 
   const sizeOptions = Object.entries(ROCKET_GROWTH_LOGISTICS_FEES) as [ProductSizeTier, typeof ROCKET_GROWTH_LOGISTICS_FEES[ProductSizeTier]][];
 
@@ -375,6 +403,63 @@ const SidebarApp: React.FC = () => {
         </div>
       </div>
 
+      {/* 목표 마진율 설정 */}
+      <div style={cardStyle}>
+        <div style={{ ...labelStyle, marginBottom: '12px' }}>🎯 목표 마진율 설정</div>
+        <div style={{ marginBottom: '12px' }}>
+          <div style={{ ...labelStyle, fontSize: '12px', marginBottom: '8px' }}>
+            목표 마진율 (%)
+          </div>
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+            <input
+              type="range"
+              min="0"
+              max="50"
+              step="1"
+              value={targetMarginRate}
+              onChange={(e) => setTargetMarginRate(parseFloat(e.target.value))}
+              style={{
+                flex: 1,
+                height: '8px',
+                borderRadius: '4px',
+                outline: 'none',
+                cursor: 'pointer',
+              }}
+            />
+            <div
+              style={{
+                fontSize: '20px',
+                fontWeight: 800,
+                color: colors.accent,
+                minWidth: '60px',
+                textAlign: 'right',
+              }}
+            >
+              {formatPercent(targetMarginRate)}
+            </div>
+          </div>
+        </div>
+        <div
+          style={{
+            fontSize: '12px',
+            background: colors.accentSoft,
+            border: `1px solid ${colors.accent}`,
+            borderRadius: '8px',
+            padding: '10px',
+          }}
+        >
+          <div style={{ fontWeight: 700, marginBottom: '6px', color: colors.accentText }}>
+            💡 추천 최대 사입가
+          </div>
+          <div style={{ fontSize: '18px', fontWeight: 800, color: colors.accentText, marginBottom: '6px' }}>
+            {formatKRW(recommendedMaxCost)}
+          </div>
+          <div style={{ fontSize: '11px', color: colors.accentText }}>
+            목표 마진율 {formatPercent(targetMarginRate)}를 달성하려면 이 가격 이하로 사입하세요
+          </div>
+        </div>
+      </div>
+
       {/* 비용 입력 */}
       <div style={cardStyle}>
         <div style={{ ...labelStyle, marginBottom: '12px' }}>💰 가격 및 비용 입력</div>
@@ -552,13 +637,51 @@ const SidebarApp: React.FC = () => {
               {formatKRW(calculation.netProfit)}
             </span>
           </div>
-          <div style={valueBox}>
-            <span style={{ fontSize: '13px', color: colors.muted, fontWeight: 600 }}>마진율</span>
+          <div
+            style={{
+              ...valueBox,
+              background: meetsTargetMargin ? '#f0fdf4' : '#fef3c7',
+              border: `2px solid ${meetsTargetMargin ? '#86efac' : colors.warningBorder}`,
+            }}
+          >
+            <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
+              <span
+                style={{
+                  fontSize: '13px',
+                  color: meetsTargetMargin ? '#15803d' : colors.warningText,
+                  fontWeight: 600,
+                }}
+              >
+                마진율 {meetsTargetMargin ? '✓' : '⚠️'}
+              </span>
+              {!meetsTargetMargin && (
+                <span
+                  style={{
+                    fontSize: '10px',
+                    color: colors.warningText,
+                    marginTop: '2px',
+                  }}
+                >
+                  목표 미달 (목표: {formatPercent(targetMarginRate)})
+                </span>
+              )}
+              {meetsTargetMargin && (
+                <span
+                  style={{
+                    fontSize: '10px',
+                    color: '#15803d',
+                    marginTop: '2px',
+                  }}
+                >
+                  목표 달성! (목표: {formatPercent(targetMarginRate)})
+                </span>
+              )}
+            </div>
             <span
               style={{
                 fontSize: '18px',
                 fontWeight: 700,
-                color: calculation.marginRate >= 20 ? '#15803d' : calculation.marginRate >= 10 ? '#ca8a04' : '#991b1b',
+                color: meetsTargetMargin ? '#15803d' : colors.warningText,
               }}
             >
               {formatPercent(calculation.marginRate)}
