@@ -1,8 +1,8 @@
 {
-  "name": "wxt-react-starter",
-  "description": "manifest.json description",
+  "name": "sellgent-ai",
+  "description": "Sellgent AI - 쿠팡 로켓그로스 마진 계산기 | Coupang Rocket Growth Margin Calculator",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "wxt",

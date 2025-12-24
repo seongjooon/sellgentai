@@ -1,0 +1,14 @@
+{
+  "extName": {
+    "message": "Sellgent AI - Rocket Growth Margin Calculator",
+    "description": "Extension name"
+  },
+  "extDescription": {
+    "message": "Real-time margin calculator for Coupang Rocket Growth sellers. Automatically calculates fees and logistics costs by category to analyze expected profits.",
+    "description": "Extension description"
+  },
+  "actionTitle": {
+    "message": "Sellgent AI - Rocket Growth Margin Calculator",
+    "description": "Action button title"
+  }
+}

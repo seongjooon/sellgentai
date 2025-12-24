@@ -1,6 +1,12 @@
-# 🚀 MarginScan - 로켓그로스 마진 계산기
+# 🤖 Sellgent AI - 로켓그로스 마진 계산기
 
-쿠팡 로켓그로스 셀러를 위한 실시간 마진 계산 크롬 확장 프로그램
+[한국어](#한국어) | [English](#english)
+
+---
+
+## 한국어
+
+쿠팡 로켓그로스 셀러를 위한 AI 기반 실시간 마진 계산 크롬 확장 프로그램
 
 ## 📋 목차
 
@@ -15,7 +21,7 @@
 
 ## 소개
 
-**MarginScan**은 쿠팡에서 제품을 찾아 로켓그로스로 판매하려는 셀러들을 위한 도구입니다. 쿠팡 상품 페이지에서 자동으로 제품 정보를 스크래핑하여 실시간으로 마진을 계산해줍니다.
+**Sellgent AI**는 쿠팡에서 제품을 찾아 로켓그로스로 판매하려는 셀러들을 위한 AI 기반 스마트 도구입니다. 쿠팡 상품 페이지에서 자동으로 제품 정보를 스크래핑하여 실시간으로 마진을 계산해줍니다.
 
 ### 타겟 사용자
 
@@ -355,6 +361,286 @@ npm run zip
 - [쿠팡 로켓그로스 공식 페이지](https://sell.coupang.com/ko-kr)
 - [2025 로켓그로스 수수료 개편](https://www.percenty.co.kr/blog/rocket-growth-fee-revision-key-details-sellers-need-to-know)
 - [WXT 문서](https://wxt.dev)
+
+---
+
+**Made with ❤️ for Coupang Rocket Growth Sellers**
+
+---
+
+## English
+
+AI-powered real-time margin calculator Chrome extension for Coupang Rocket Growth sellers
+
+## 📋 Table of Contents
+
+- [About](#about)
+- [Key Features](#key-features)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Tech Stack](#tech-stack)
+- [Development](#development)
+- [Build](#build)
+- [License](#license)
+
+## About
+
+**Sellgent AI** is an AI-powered smart tool for sellers who want to find products on Coupang and sell them through Rocket Growth. It automatically scrapes product information from Coupang product pages and calculates margins in real-time.
+
+### Target Users
+
+- Coupang Rocket Growth sellers
+- Online resellers
+- E-commerce businesses
+
+## Key Features
+
+### ✨ Core Features
+
+- **Automatic Product Information Scraping**
+  - Auto-extract product name, price, shipping fee, category
+  - Collect seller information and review data
+
+- **Accurate Fee Calculation**
+  - 50+ category-specific sales commission rates (4% ~ 11.88%)
+  - Automatic VAT calculation (10% of commission)
+  - Rocket Growth logistics fee calculation (11 price tiers × 6 size tiers)
+
+- **Target Margin Rate Analysis**
+  - Set target margin rate (0~50%)
+  - Recommended maximum purchase price to achieve target margin
+  - Real-time profitability analysis
+
+- **Real-time Margin Analysis**
+  - Estimated net profit calculation
+  - Margin rate percentage
+  - Maximum purchase price recommendation (0% margin basis)
+
+- **Intuitive UI/UX**
+  - Sidebar mode for use alongside Coupang pages
+  - Real-time calculation result updates
+  - Color coding for profitability visualization
+
+### 🎯 Detailed Features
+
+#### 1. Product Size Selection (6 tiers)
+Logistics fees vary by price and size:
+- Extra Small
+- Small
+- Medium
+- Large 1
+- Large 2
+- Extra Large
+
+#### 2. Price and Cost Input
+- **Sale Price**: Auto-scraped + manual adjustment
+- **Cost**: Purchase price input
+- **Extra Cost**: Additional cost input
+
+#### 3. Fee Details
+```
+📊 Rocket Growth Fees
+├─ Sales Commission (by category)
+├─ VAT (10%)
+├─ Inbound Fee (by size)
+├─ Shipping Fee (by size)
+└─ Total Fee
+```
+
+#### 4. Margin Calculation Results
+- Total cost
+- Estimated net profit
+- Margin rate (%)
+- Maximum purchase price
+
+#### 5. Smart Alerts
+- ⚠️ Coupang direct purchase product warning
+- 🔄 Loading status indicator
+- ❌ Error handling and retry
+
+## Installation
+
+### Development Mode (Recommended)
+
+1. **Clone Repository**
+```bash
+git clone <repository-url>
+cd marginscan
+```
+
+2. **Install Dependencies**
+```bash
+npm install
+```
+
+3. **Run Development Server**
+```bash
+npm run dev
+```
+
+4. **Load Extension in Chrome**
+   - Open `chrome://extensions/` in Chrome browser
+   - Enable "Developer mode" in the top right
+   - Click "Load unpacked"
+   - Select `.output/chrome-mv3-dev` folder
+
+### Production Build
+
+```bash
+npm run build
+npm run zip
+```
+
+Upload the generated `.output/*.zip` file to Chrome Web Store.
+
+## Usage
+
+### Basic Usage
+
+1. **Visit Coupang Product Page**
+   ```
+   Example: https://www.coupang.com/vp/products/[product-id]
+   ```
+
+2. **Click Extension Icon**
+   - Click MarginScan icon in the top right of browser
+   - Sidebar opens automatically
+
+3. **Verify Auto-scraping**
+   - Product information is automatically filled
+   - Category and commission rate auto-detected
+
+4. **Enter Information**
+   - Select product size (choose from 6 tiers)
+   - Enter cost (purchase price)
+   - Enter extra cost (optional)
+
+5. **Check Results**
+   - Real-time margin calculation results
+   - Color coding based on profitability
+
+## Tech Stack
+
+### Frameworks & Libraries
+- **WXT** (0.20.6) - Web Extension Tools
+- **React** (19.1.1) - UI library
+- **TypeScript** (5.9.2) - Type safety
+- **Vite** - Build tool
+
+### Architecture
+```
+marginscan/
+├── entrypoints/
+│   ├── background.ts         # Background service worker
+│   ├── content.ts            # Content script (scraping)
+│   └── sidebar/
+│       ├── main.tsx          # React app
+│       ├── types.ts          # TypeScript types
+│       └── feeCalculator.ts  # Fee calculation logic
+├── public/
+│   ├── icon/                 # Extension icons
+│   └── _locales/             # Internationalization
+├── wxt.config.ts             # WXT configuration
+└── package.json
+```
+
+## Development
+
+### Development Environment Setup
+
+```bash
+# Install dependencies
+npm install
+
+# Run development server (hot reload)
+npm run dev
+
+# TypeScript type check
+npm run compile
+```
+
+### Scripts
+
+| Command | Description |
+|--------|------|
+| `npm run dev` | Run development server (Chrome) |
+| `npm run dev:firefox` | Run development server (Firefox) |
+| `npm run build` | Production build (Chrome) |
+| `npm run build:firefox` | Production build (Firefox) |
+| `npm run zip` | Package for Chrome Web Store |
+| `npm run compile` | TypeScript type check |
+
+## Build
+
+### Production Build
+
+```bash
+npm run build
+```
+
+Build output:
+```
+.output/chrome-mv3/
+├── manifest.json
+├── background.js
+├── content-scripts/
+│   └── content.js
+├── chunks/
+│   └── sidebar-*.js
+└── icon/
+    ├── 16.png
+    ├── 32.png
+    ├── 48.png
+    ├── 96.png
+    └── 128.png
+```
+
+### Deployment Package
+
+```bash
+npm run zip
+```
+
+Creates `.output/marginscan-1.0.0-chrome.zip` file
+
+## Roadmap
+
+### Future Plans
+
+- [ ] Save calculation result history
+- [ ] Multi-product comparison feature
+- [ ] Excel export
+- [ ] Dark mode
+- [ ] Naver Smart Store support
+- [ ] Coupang WOW member price consideration
+
+## Contributing
+
+Contributions are always welcome!
+
+1. Fork the Project
+2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the Branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## License
+
+This project is distributed under the MIT License.
+
+## Disclaimer
+
+This is an unofficial tool and is not affiliated with Coupang. Commission rates and logistics fees may change, so always check the latest information at [Coupang Seller Center](https://wing.coupang.com).
+
+## Privacy Policy
+
+Sellgent AI does not collect any personal information. All data is processed locally in your browser and is never transmitted to external servers. For more details, see [PRIVACY_POLICY.md](PRIVACY_POLICY.md).
+
+## References
+
+- [Coupang Rocket Growth Official Page](https://sell.coupang.com/ko-kr)
+- [2025 Rocket Growth Fee Update](https://www.percenty.co.kr/blog/rocket-growth-fee-revision-key-details-sellers-need-to-know)
+- [WXT Documentation](https://wxt.dev)
 
 ---
 
