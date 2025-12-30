@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { createRoot } from 'react-dom/client';
-import type { CommonProductData } from './types';
+import type { CommonProductData, CalculationHistory } from './types';
 import {
   calculateRocketGrossFees,
   getCategoryFeeRate,
@@ -607,6 +607,37 @@ const SidebarApp: React.FC = () => {
     localStorage.setItem('isBeginnerMode', isBeginnerMode.toString());
   }, [isBeginnerMode]);
 
+  // 히스토리 state
+  const [history, setHistory] = useState<CalculationHistory[]>(() => {
+    const saved = localStorage.getItem('calculationHistory');
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  const [showHistory, setShowHistory] = useState(false);
+
+  // 히스토리 저장 함수
+  const saveToHistory = () => {
+    if (!product?.title || salePrice === 0 || cost === 0) return;
+
+    const newEntry: CalculationHistory = {
+      id: Date.now().toString(),
+      timestamp: Date.now(),
+      productTitle: product.title,
+      productUrl: product.url,
+      salePrice,
+      cost,
+      extraCost,
+      productSize,
+      marginRate: calculation.marginRate,
+      netProfit: calculation.netProfit,
+      totalFee: calculation.totalFee,
+    };
+
+    const updatedHistory = [newEntry, ...history].slice(0, 10); // 최근 10개만 저장
+    setHistory(updatedHistory);
+    localStorage.setItem('calculationHistory', JSON.stringify(updatedHistory));
+  };
+
   const sizeOptions = Object.entries(PRODUCT_SIZE_INFO) as [ProductSizeTier, typeof PRODUCT_SIZE_INFO[ProductSizeTier]][];
 
   // 현재 가격대에서의 물류비 계산
@@ -637,8 +668,8 @@ const SidebarApp: React.FC = () => {
           boxShadow: '0 4px 12px rgba(45, 74, 62, 0.15)',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div>
+        <div>
+          <div style={{ marginBottom: '12px' }}>
             <div style={{
               fontSize: '18px',
               fontWeight: 800,
@@ -659,23 +690,28 @@ const SidebarApp: React.FC = () => {
               로켓그로스 마진 계산기
             </div>
           </div>
-          <div style={{ display: 'flex', gap: '8px' }}>
-            {/* 초보 모드 토글 */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(2, 1fr)',
+            gap: '6px',
+          }}>
+            {/* 히스토리 토글 */}
             <button
-              onClick={() => setIsBeginnerMode(!isBeginnerMode)}
+              onClick={() => setShowHistory(!showHistory)}
               style={{
-                padding: '10px 14px',
-                fontSize: '13px',
+                padding: '8px 10px',
+                fontSize: '12px',
                 fontWeight: 600,
-                border: '2px solid rgba(255, 255, 255, 0.3)',
-                borderRadius: '10px',
-                background: isBeginnerMode ? 'rgba(74, 222, 128, 0.3)' : 'rgba(255, 255, 255, 0.15)',
+                border: '1px solid rgba(255, 255, 255, 0.3)',
+                borderRadius: '8px',
+                background: showHistory ? 'rgba(74, 222, 128, 0.3)' : 'rgba(255, 255, 255, 0.15)',
                 backdropFilter: 'blur(10px)',
                 color: '#ffffff',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '6px',
+                justifyContent: 'center',
+                gap: '4px',
                 transition: 'all 0.2s ease',
               }}
               onMouseEnter={(e) => {
@@ -685,8 +721,70 @@ const SidebarApp: React.FC = () => {
                 e.currentTarget.style.transform = 'translateY(0)';
               }}
             >
-              <span style={{ fontSize: '14px' }}>🎓</span>
-              {isBeginnerMode ? '초보 모드' : '전문 모드'}
+              <span style={{ fontSize: '13px' }}>📋</span>
+              히스토리 ({history.length})
+            </button>
+            {/* 저장 버튼 */}
+            <button
+              onClick={saveToHistory}
+              disabled={!product?.title || salePrice === 0 || cost === 0}
+              style={{
+                padding: '8px 10px',
+                fontSize: '12px',
+                fontWeight: 600,
+                border: '1px solid rgba(255, 255, 255, 0.3)',
+                borderRadius: '8px',
+                background: 'rgba(255, 255, 255, 0.15)',
+                backdropFilter: 'blur(10px)',
+                color: '#ffffff',
+                cursor: (!product?.title || salePrice === 0 || cost === 0) ? 'not-allowed' : 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '4px',
+                transition: 'all 0.2s ease',
+                opacity: (!product?.title || salePrice === 0 || cost === 0) ? 0.5 : 1,
+              }}
+              onMouseEnter={(e) => {
+                if (product?.title && salePrice !== 0 && cost !== 0) {
+                  e.currentTarget.style.transform = 'translateY(-1px)';
+                }
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+              }}
+            >
+              <span style={{ fontSize: '13px' }}>💾</span>
+              저장
+            </button>
+            {/* 초보 모드 토글 */}
+            <button
+              onClick={() => setIsBeginnerMode(!isBeginnerMode)}
+              style={{
+                padding: '8px 10px',
+                fontSize: '12px',
+                fontWeight: 600,
+                border: '1px solid rgba(255, 255, 255, 0.3)',
+                borderRadius: '8px',
+                background: isBeginnerMode ? 'rgba(74, 222, 128, 0.3)' : 'rgba(255, 255, 255, 0.15)',
+                backdropFilter: 'blur(10px)',
+                color: '#ffffff',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '4px',
+                transition: 'all 0.2s ease',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-1px)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+              }}
+            >
+              <span style={{ fontSize: '13px' }}>🎓</span>
+              {isBeginnerMode ? '초보' : '전문'}
             </button>
             <button
               onClick={() => {
@@ -694,18 +792,19 @@ const SidebarApp: React.FC = () => {
                 setSalePriceOverride(null);
               }}
             style={{
-              padding: '10px 14px',
-              fontSize: '13px',
+              padding: '8px 10px',
+              fontSize: '12px',
               fontWeight: 600,
-              border: '2px solid rgba(255, 255, 255, 0.3)',
-              borderRadius: '10px',
+              border: '1px solid rgba(255, 255, 255, 0.3)',
+              borderRadius: '8px',
               background: 'rgba(255, 255, 255, 0.15)',
               backdropFilter: 'blur(10px)',
               color: '#ffffff',
               cursor: isLoading ? 'not-allowed' : 'pointer',
               display: 'flex',
               alignItems: 'center',
-              gap: '6px',
+              justifyContent: 'center',
+              gap: '4px',
               transition: 'all 0.2s ease',
               opacity: isLoading ? 0.6 : 1,
             }}
@@ -721,12 +820,236 @@ const SidebarApp: React.FC = () => {
               e.currentTarget.style.transform = 'translateY(0)';
             }}
           >
-            <span style={{ fontSize: '14px' }}>🔄</span>
+            <span style={{ fontSize: '13px' }}>🔄</span>
             새로고침
           </button>
           </div>
         </div>
       </div>
+
+      {/* 히스토리 UI */}
+      {showHistory && (
+        <div style={{
+          margin: '16px',
+          marginBottom: '0',
+          padding: '16px',
+          background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.primaryLight} 100%)`,
+          borderRadius: '16px',
+          border: '2px solid rgba(255, 255, 255, 0.3)',
+          boxShadow: '0 4px 12px rgba(45, 74, 62, 0.2)',
+        }}>
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: '12px',
+          }}>
+            <h3 style={{
+              margin: 0,
+              fontSize: '16px',
+              fontWeight: 700,
+              color: '#ffffff',
+            }}>
+              계산 히스토리
+            </h3>
+            {history.length > 0 && (
+              <button
+                onClick={() => {
+                  setHistory([]);
+                  localStorage.removeItem('calculationHistory');
+                }}
+                style={{
+                  padding: '6px 12px',
+                  fontSize: '12px',
+                  fontWeight: 600,
+                  border: '1px solid rgba(255, 255, 255, 0.3)',
+                  borderRadius: '8px',
+                  background: 'rgba(239, 68, 68, 0.2)',
+                  color: '#ffffff',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'rgba(239, 68, 68, 0.3)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'rgba(239, 68, 68, 0.2)';
+                }}
+              >
+                전체 삭제
+              </button>
+            )}
+          </div>
+
+          {history.length === 0 ? (
+            <div style={{
+              padding: '32px',
+              textAlign: 'center',
+              color: 'rgba(255, 255, 255, 0.6)',
+              fontSize: '14px',
+            }}>
+              저장된 히스토리가 없습니다.
+            </div>
+          ) : (
+            <div style={{
+              maxHeight: '400px',
+              overflowY: 'auto',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '8px',
+            }}>
+              {history.map((item) => {
+                const date = new Date(item.timestamp);
+                const formattedDate = `${date.getMonth() + 1}/${date.getDate()} ${date.getHours()}:${String(date.getMinutes()).padStart(2, '0')}`;
+
+                return (
+                  <div
+                    key={item.id}
+                    style={{
+                      padding: '12px',
+                      background: 'rgba(255, 255, 255, 0.2)',
+                      borderRadius: '12px',
+                      border: '1px solid rgba(255, 255, 255, 0.3)',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = 'rgba(255, 255, 255, 0.3)';
+                      e.currentTarget.style.transform = 'translateY(-2px)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = 'rgba(255, 255, 255, 0.2)';
+                      e.currentTarget.style.transform = 'translateY(0)';
+                    }}
+                    onClick={() => {
+                      // 히스토리에서 데이터 불러오기
+                      setSalePriceOverride(item.salePrice);
+                      setCost(item.cost);
+                      setExtraCost(item.extraCost);
+                      // productSize 타입 검증
+                      const validSizes: ProductSizeTier[] = ['extra-small', 'small', 'medium', 'large-1', 'large-2', 'extra-large'];
+                      if (validSizes.includes(item.productSize as ProductSizeTier)) {
+                        setProductSize(item.productSize as ProductSizeTier);
+                      }
+                      setShowHistory(false);
+                    }}
+                  >
+                    <div style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'flex-start',
+                      marginBottom: '8px',
+                    }}>
+                      <div style={{
+                        flex: 1,
+                        fontSize: '13px',
+                        fontWeight: 600,
+                        color: '#ffffff',
+                        lineHeight: '1.4',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        display: '-webkit-box',
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: 'vertical',
+                      }}>
+                        {item.productTitle || '제목 없음'}
+                      </div>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          const updatedHistory = history.filter(h => h.id !== item.id);
+                          setHistory(updatedHistory);
+                          localStorage.setItem('calculationHistory', JSON.stringify(updatedHistory));
+                        }}
+                        style={{
+                          marginLeft: '8px',
+                          padding: '4px 8px',
+                          fontSize: '11px',
+                          border: '1px solid rgba(255, 255, 255, 0.3)',
+                          borderRadius: '6px',
+                          background: 'rgba(239, 68, 68, 0.2)',
+                          color: '#ffffff',
+                          cursor: 'pointer',
+                          flexShrink: 0,
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.background = 'rgba(239, 68, 68, 0.3)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.background = 'rgba(239, 68, 68, 0.2)';
+                        }}
+                      >
+                        삭제
+                      </button>
+                    </div>
+                    <div style={{
+                      fontSize: '11px',
+                      color: 'rgba(255, 255, 255, 0.5)',
+                      marginBottom: '8px',
+                    }}>
+                      {formattedDate}
+                    </div>
+                    <div style={{
+                      display: 'grid',
+                      gridTemplateColumns: 'repeat(3, 1fr)',
+                      gap: '8px',
+                    }}>
+                      <div>
+                        <div style={{
+                          fontSize: '10px',
+                          color: 'rgba(255, 255, 255, 0.5)',
+                          marginBottom: '2px',
+                        }}>
+                          마진율
+                        </div>
+                        <div style={{
+                          fontSize: '13px',
+                          fontWeight: 700,
+                          color: item.marginRate >= 15 ? '#4ade80' : item.marginRate >= 10 ? '#fbbf24' : '#f87171',
+                        }}>
+                          {item.marginRate.toFixed(1)}%
+                        </div>
+                      </div>
+                      <div>
+                        <div style={{
+                          fontSize: '10px',
+                          color: 'rgba(255, 255, 255, 0.5)',
+                          marginBottom: '2px',
+                        }}>
+                          순이익
+                        </div>
+                        <div style={{
+                          fontSize: '13px',
+                          fontWeight: 700,
+                          color: item.netProfit >= 0 ? '#4ade80' : '#f87171',
+                        }}>
+                          {item.netProfit.toLocaleString()}원
+                        </div>
+                      </div>
+                      <div>
+                        <div style={{
+                          fontSize: '10px',
+                          color: 'rgba(255, 255, 255, 0.5)',
+                          marginBottom: '2px',
+                        }}>
+                          판매가
+                        </div>
+                        <div style={{
+                          fontSize: '13px',
+                          fontWeight: 600,
+                          color: '#ffffff',
+                        }}>
+                          {item.salePrice.toLocaleString()}원
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
 
       <div style={{ padding: '0 16px 16px' }}>
 

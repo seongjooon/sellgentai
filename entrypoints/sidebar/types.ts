@@ -15,3 +15,17 @@ export interface CommonProductData {
   categoryPath: string[];
   selectedOptions: string[];
 }
+
+export interface CalculationHistory {
+  id: string;
+  timestamp: number;
+  productTitle: string | null;
+  productUrl: string | null;
+  salePrice: number;
+  cost: number;
+  extraCost: number;
+  productSize: string;
+  marginRate: number;
+  netProfit: number;
+  totalFee: number;
+}
