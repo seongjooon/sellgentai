@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { createRoot } from 'react-dom/client';
+import './app.css';
 import type { CommonProductData, CalculationHistory } from './types';
 import {
   calculateRocketGrossFees,
@@ -9,9 +10,11 @@ import {
   PRODUCT_SIZE_INFO,
   type ProductSizeTier,
 } from './feeCalculator';
-import { MarginBadge } from './components/MarginBadge';
+import { Header } from './components/Header';
+import { MarginHero } from './components/MarginHero';
+import { HistoryPanel } from './components/History';
+import { Card, CardHeader, CardContent, Input, Select, Slider, SkeletonCard, Alert } from './components/ui';
 import { ActionCard } from './components/ActionCard';
-import { TermWithTooltip } from './components/TermWithTooltip';
 import { getPlainTerm } from './constants/plainLanguage';
 import {
   estimateCost,
@@ -20,147 +23,11 @@ import {
   TARGET_MARGIN_HINT_MESSAGE,
 } from './constants/smartDefaults';
 
-// Sellgent AI 브랜드 컬러 팔레트
-const colors = {
-  // 메인 브랜드 컬러 (로고의 다크 그린)
-  primary: '#2d4a3e',
-  primaryLight: '#3d5a4e',
-  primaryDark: '#1d3a2e',
+// 유틸리티 함수
+const formatKRW = (value: number) => `${Math.floor(value).toLocaleString('ko-KR')} 원`;
+const formatPercent = (value: number) => `${Math.floor(value * 10) / 10} %`;
 
-  // 액센트 컬러 (밝은 그린)
-  accent: '#4ade80',
-  accentHover: '#22c55e',
-  accentSoft: '#dcfce7',
-  accentText: '#166534',
-
-  // 배경
-  bg: '#f8fafb',
-  bgGradient: 'linear-gradient(135deg, #f8fafb 0%, #e8f4f0 100%)',
-  panel: '#ffffff',
-  panelHover: '#fafafa',
-
-  // 테두리 및 텍스트
-  border: '#e5e7eb',
-  borderLight: '#f3f4f6',
-  text: '#111827',
-  textMuted: '#6b7280',
-  textLight: '#9ca3af',
-
-  // 입력 필드
-  fieldBg: '#f9fafb',
-  fieldBorder: '#d1d5db',
-  fieldFocus: '#4ade80',
-
-  // 상태 컬러
-  success: '#22c55e',
-  successBg: '#dcfce7',
-  successBorder: '#86efac',
-  successText: '#166534',
-
-  warning: '#fbbf24',
-  warningBg: '#fef3c7',
-  warningBorder: '#fcd34d',
-  warningText: '#92400e',
-
-  danger: '#ef4444',
-  dangerBg: '#fee2e2',
-  dangerBorder: '#fca5a5',
-  dangerText: '#991b1b',
-
-  info: '#3b82f6',
-  infoBg: '#dbeafe',
-  infoBorder: '#93c5fd',
-  infoText: '#1e40af',
-
-  // Alias for backward compatibility
-  muted: '#6b7280',
-};
-
-const cardStyle: React.CSSProperties = {
-  borderRadius: '16px',
-  border: `1px solid ${colors.borderLight}`,
-  background: colors.panel,
-  padding: '18px',
-  marginBottom: '14px',
-  boxShadow: '0 2px 8px rgba(45, 74, 62, 0.06), 0 1px 2px rgba(45, 74, 62, 0.04)',
-  transition: 'all 0.2s ease',
-};
-
-const labelStyle: React.CSSProperties = {
-  fontSize: '13px',
-  fontWeight: 700,
-  color: colors.text,
-  marginBottom: '8px',
-  letterSpacing: '-0.01em',
-};
-
-const valueBox: React.CSSProperties = {
-  border: `2px solid ${colors.borderLight}`,
-  borderRadius: '12px',
-  background: colors.fieldBg,
-  padding: '14px 16px',
-  fontSize: '18px',
-  fontWeight: 700,
-  color: colors.text,
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'space-between',
-  transition: 'all 0.2s ease',
-};
-
-const formatKRW = (value: number) => `${value.toLocaleString('ko-KR')} 원`;
-const formatPercent = (value: number) => `${value.toLocaleString('ko-KR', { maximumFractionDigits: 1 })} %`;
-
-// 스켈레톤 로딩 컴포넌트
-const SkeletonBox: React.FC<{ height?: string; width?: string }> = ({ height = '20px', width = '100%' }) => (
-  <div
-    style={{
-      height,
-      width,
-      background: 'linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%)',
-      backgroundSize: '200% 100%',
-      animation: 'shimmer 1.5s infinite',
-      borderRadius: '8px',
-    }}
-  />
-);
-
-// 숫자 카운트업 애니메이션 훅
-const useCountUp = (end: number, duration: number = 800) => {
-  const [count, setCount] = useState(0);
-
-  useEffect(() => {
-    let startTime: number | null = null;
-    const startValue = 0;
-
-    const animate = (currentTime: number) => {
-      if (startTime === null) startTime = currentTime;
-      const progress = Math.min((currentTime - startTime) / duration, 1);
-
-      // Easing function
-      const easeOutQuad = (t: number) => t * (2 - t);
-      const currentCount = startValue + (end - startValue) * easeOutQuad(progress);
-
-      setCount(Math.floor(currentCount));
-
-      if (progress < 1) {
-        requestAnimationFrame(animate);
-      } else {
-        setCount(end);
-      }
-    };
-
-    if (end !== 0) {
-      requestAnimationFrame(animate);
-    } else {
-      setCount(0);
-    }
-  }, [end, duration]);
-
-  return count;
-};
-
-// 도넛 차트 컴포넌트
+// 도넛 차트 컴포넌트 (차후 컴포넌트로 분리 예정)
 const DonutChart: React.FC<{
   salesFee: number;
   logisticsFee: number;
@@ -186,14 +53,14 @@ const DonutChart: React.FC<{
   const profitOffset = -((salesPercent + logisticsPercent) / 100) * circumference;
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginTop: '12px' }}>
-      <svg width="160" height="160" style={{ transform: 'rotate(-90deg)' }}>
+    <div className="flex items-center gap-5 mt-3">
+      <svg width="160" height="160" className="-rotate-90">
         <circle
           cx="80"
           cy="80"
           r={radius}
           fill="none"
-          stroke={colors.borderLight}
+          stroke="#2D3340"
           strokeWidth="24"
         />
         {/* 판매 수수료 */}
@@ -202,11 +69,11 @@ const DonutChart: React.FC<{
           cy="80"
           r={radius}
           fill="none"
-          stroke={colors.warning}
+          stroke="#FFB84D"
           strokeWidth="24"
           strokeDasharray={salesDasharray}
           strokeDashoffset={salesOffset}
-          style={{ transition: 'all 0.6s ease' }}
+          className="transition-all duration-600"
         />
         {/* 물류비 */}
         <circle
@@ -214,11 +81,11 @@ const DonutChart: React.FC<{
           cy="80"
           r={radius}
           fill="none"
-          stroke={colors.info}
+          stroke="#3B82F6"
           strokeWidth="24"
           strokeDasharray={logisticsDasharray}
           strokeDashoffset={logisticsOffset}
-          style={{ transition: 'all 0.6s ease' }}
+          className="transition-all duration-600"
         />
         {/* 순이익 */}
         {profit > 0 && (
@@ -227,162 +94,33 @@ const DonutChart: React.FC<{
             cy="80"
             r={radius}
             fill="none"
-            stroke={colors.success}
+            stroke="#00D084"
             strokeWidth="24"
             strokeDasharray={profitDasharray}
             strokeDashoffset={profitOffset}
-            style={{ transition: 'all 0.6s ease' }}
+            className="transition-all duration-600"
           />
         )}
       </svg>
-      <div style={{ flex: 1, fontSize: '12px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-          <div style={{ width: '12px', height: '12px', borderRadius: '3px', background: colors.warning }} />
-          <span style={{ color: colors.textMuted }}>판매 수수료</span>
-          <span style={{ marginLeft: 'auto', fontWeight: 700 }}>{salesPercent.toFixed(1)}%</span>
+      <div className="flex-1 text-xs space-y-2">
+        <div className="flex items-center gap-2">
+          <div className="w-3 h-3 rounded bg-brand-warning" />
+          <span className="text-text-secondary">판매 수수료</span>
+          <span className="ml-auto font-bold text-text-primary">{salesPercent.toFixed(1)}%</span>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-          <div style={{ width: '12px', height: '12px', borderRadius: '3px', background: colors.info }} />
-          <span style={{ color: colors.textMuted }}>물류비</span>
-          <span style={{ marginLeft: 'auto', fontWeight: 700 }}>{logisticsPercent.toFixed(1)}%</span>
+        <div className="flex items-center gap-2">
+          <div className="w-3 h-3 rounded bg-blue-500" />
+          <span className="text-text-secondary">물류비</span>
+          <span className="ml-auto font-bold text-text-primary">{logisticsPercent.toFixed(1)}%</span>
         </div>
         {profit > 0 && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <div style={{ width: '12px', height: '12px', borderRadius: '3px', background: colors.success }} />
-            <span style={{ color: colors.textMuted }}>순이익</span>
-            <span style={{ marginLeft: 'auto', fontWeight: 700 }}>{profitPercent.toFixed(1)}%</span>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded bg-brand-primary" />
+            <span className="text-text-secondary">순이익</span>
+            <span className="ml-auto font-bold text-text-primary">{profitPercent.toFixed(1)}%</span>
           </div>
         )}
       </div>
-    </div>
-  );
-};
-
-// 마진율 게이지 차트
-const MarginGauge: React.FC<{ current: number; target: number }> = ({ current, target }) => {
-  const maxValue = Math.max(50, target + 10);
-  const currentPercent = Math.min((current / maxValue) * 100, 100);
-  const targetPercent = (target / maxValue) * 100;
-
-  const getColor = () => {
-    if (current < 0) return colors.danger;
-    if (current < target) return colors.warning;
-    return colors.success;
-  };
-
-  return (
-    <div style={{ marginTop: '16px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '12px' }}>
-        <span style={{ color: colors.textMuted }}>현재 마진율</span>
-        <span style={{ fontWeight: 700, color: getColor(), fontSize: '16px' }}>
-          {formatPercent(current)}
-        </span>
-      </div>
-      <div style={{ position: 'relative', height: '32px', background: colors.borderLight, borderRadius: '16px', overflow: 'hidden' }}>
-        <div
-          style={{
-            position: 'absolute',
-            left: 0,
-            top: 0,
-            height: '100%',
-            width: `${Math.max(0, currentPercent)}%`,
-            background: `linear-gradient(90deg, ${getColor()}, ${getColor()}dd)`,
-            borderRadius: '16px',
-            transition: 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'flex-end',
-            paddingRight: '12px',
-          }}
-        >
-          {currentPercent > 20 && (
-            <span style={{ color: 'white', fontSize: '13px', fontWeight: 800 }}>
-              {formatPercent(current)}
-            </span>
-          )}
-        </div>
-        {/* 목표 마커 */}
-        <div
-          style={{
-            position: 'absolute',
-            left: `${targetPercent}%`,
-            top: '-4px',
-            bottom: '-4px',
-            width: '3px',
-            background: colors.primary,
-            borderRadius: '2px',
-          }}
-        >
-          <div
-            style={{
-              position: 'absolute',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              background: colors.primary,
-              color: 'white',
-              fontSize: '9px',
-              fontWeight: 700,
-              padding: '2px 6px',
-              borderRadius: '4px',
-              whiteSpace: 'nowrap',
-            }}
-          >
-            목표 {formatPercent(target)}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// 툴팁 컴포넌트
-const Tooltip: React.FC<{ text: string; children: React.ReactNode }> = ({ text, children }) => {
-  const [show, setShow] = useState(false);
-
-  return (
-    <div style={{ position: 'relative', display: 'inline-block' }}>
-      <span
-        onMouseEnter={() => setShow(true)}
-        onMouseLeave={() => setShow(false)}
-        style={{ cursor: 'help' }}
-      >
-        {children}
-      </span>
-      {show && (
-        <div
-          style={{
-            position: 'absolute',
-            bottom: '100%',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            marginBottom: '8px',
-            padding: '8px 12px',
-            background: colors.text,
-            color: 'white',
-            fontSize: '11px',
-            borderRadius: '6px',
-            whiteSpace: 'nowrap',
-            zIndex: 1000,
-            boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-          }}
-        >
-          {text}
-          <div
-            style={{
-              position: 'absolute',
-              top: '100%',
-              left: '50%',
-              transform: 'translateX(-50%)',
-              width: 0,
-              height: 0,
-              borderLeft: '6px solid transparent',
-              borderRight: '6px solid transparent',
-              borderTop: `6px solid ${colors.text}`,
-            }}
-          />
-        </div>
-      )}
     </div>
   );
 };
@@ -399,20 +137,14 @@ const Accordion: React.FC<{ title: string; children: React.ReactNode; defaultOpe
     <div>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        style={{
-          width: '100%',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          background: 'transparent',
-          border: 'none',
-          padding: '0',
-          cursor: 'pointer',
-          marginBottom: isOpen ? '12px' : '0',
-        }}
+        className="w-full flex items-center justify-between bg-transparent border-none p-0 cursor-pointer"
+        style={{ marginBottom: isOpen ? '12px' : '0' }}
       >
-        <div style={labelStyle}>{title}</div>
-        <span style={{ fontSize: '18px', transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }}>
+        <div className="text-sm font-bold text-text-primary">{title}</div>
+        <span
+          className="text-lg transition-transform duration-200 text-text-secondary"
+          style={{ transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
+        >
           ▼
         </span>
       </button>
@@ -450,6 +182,13 @@ const SidebarApp: React.FC = () => {
     return saved ? saved === 'true' : true; // 기본값 true (초보 모드 ON)
   });
 
+  // 다크모드 state
+  const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
+    // localStorage에서 다크모드 설정 불러오기
+    const saved = localStorage.getItem('isDarkMode');
+    return saved ? saved === 'true' : false; // 기본값 false (라이트모드 ON)
+  });
+
   // 초보 모드에 따라 용어 표시
   const getTerm = (term: string) => {
     return isBeginnerMode ? getPlainTerm(term) : term;
@@ -480,7 +219,7 @@ const SidebarApp: React.FC = () => {
     return Number.isFinite(parsed) ? parsed : 0;
   };
 
-  const formatInput = (value: number) => value.toLocaleString('ko-KR');
+  const formatInput = (value: number) => Math.floor(value).toLocaleString('ko-KR');
 
   const calculation = useMemo(() => {
 
@@ -607,6 +346,16 @@ const SidebarApp: React.FC = () => {
     localStorage.setItem('isBeginnerMode', isBeginnerMode.toString());
   }, [isBeginnerMode]);
 
+  // 다크모드 변경 시 localStorage에 저장 및 body 클래스 적용
+  useEffect(() => {
+    localStorage.setItem('isDarkMode', isDarkMode.toString());
+    if (isDarkMode) {
+      document.body.classList.remove('light-mode');
+    } else {
+      document.body.classList.add('light-mode');
+    }
+  }, [isDarkMode]);
+
   // 히스토리 state
   const [history, setHistory] = useState<CalculationHistory[]>(() => {
     const saved = localStorage.getItem('calculationHistory');
@@ -645,888 +394,290 @@ const SidebarApp: React.FC = () => {
     return getLogisticsFee(salePrice, productSize);
   }, [salePrice, productSize]);
 
-  // 애니메이션용 카운트업 값
-  const animatedProfit = useCountUp(calculation.netProfit);
-  const animatedMargin = useCountUp(calculation.marginRate * 10) / 10;
-
   return (
-    <div
-      style={{
-        fontFamily: 'Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-        background: colors.bgGradient,
-        minHeight: '100vh',
-        padding: '0',
-        color: colors.text,
-      }}
-    >
-      {/* 헤더 - 브랜드 그라디언트 */}
-      <div
-        style={{
-          background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.primaryLight} 100%)`,
-          padding: '20px 16px',
-          marginBottom: '16px',
-          boxShadow: '0 4px 12px rgba(45, 74, 62, 0.15)',
+    <div className="font-sans bg-bg-primary min-h-screen text-text-primary">
+      {/* 새로운 Header 컴포넌트 */}
+      <Header
+        historyCount={history.length}
+        isBeginnerMode={isBeginnerMode}
+        showHistory={showHistory}
+        isLoading={isLoading}
+        canSave={!!(product?.title && salePrice !== 0 && cost !== 0)}
+        isDarkMode={isDarkMode}
+        onHistoryClick={() => setShowHistory(!showHistory)}
+        onSaveClick={saveToHistory}
+        onBeginnerModeClick={() => setIsBeginnerMode(!isBeginnerMode)}
+        onRefreshClick={() => {
+          handleRequestScrape();
+          setSalePriceOverride(null);
         }}
-      >
-        <div>
-          <div style={{ marginBottom: '12px' }}>
-            <div style={{
-              fontSize: '18px',
-              fontWeight: 800,
-              color: '#ffffff',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              marginBottom: '4px',
-            }}>
-              <span style={{ fontSize: '24px' }}>🤖</span>
-              Sellgent AI
-            </div>
-            <div style={{
-              fontSize: '12px',
-              color: 'rgba(255, 255, 255, 0.85)',
-              fontWeight: 500,
-            }}>
-              로켓그로스 마진 계산기
-            </div>
-          </div>
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(2, 1fr)',
-            gap: '6px',
-          }}>
-            {/* 히스토리 토글 */}
-            <button
-              onClick={() => setShowHistory(!showHistory)}
-              style={{
-                padding: '8px 10px',
-                fontSize: '12px',
-                fontWeight: 600,
-                border: '1px solid rgba(255, 255, 255, 0.3)',
-                borderRadius: '8px',
-                background: showHistory ? 'rgba(74, 222, 128, 0.3)' : 'rgba(255, 255, 255, 0.15)',
-                backdropFilter: 'blur(10px)',
-                color: '#ffffff',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '4px',
-                transition: 'all 0.2s ease',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-1px)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-              }}
-            >
-              <span style={{ fontSize: '13px' }}>📋</span>
-              히스토리 ({history.length})
-            </button>
-            {/* 저장 버튼 */}
-            <button
-              onClick={saveToHistory}
-              disabled={!product?.title || salePrice === 0 || cost === 0}
-              style={{
-                padding: '8px 10px',
-                fontSize: '12px',
-                fontWeight: 600,
-                border: '1px solid rgba(255, 255, 255, 0.3)',
-                borderRadius: '8px',
-                background: 'rgba(255, 255, 255, 0.15)',
-                backdropFilter: 'blur(10px)',
-                color: '#ffffff',
-                cursor: (!product?.title || salePrice === 0 || cost === 0) ? 'not-allowed' : 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '4px',
-                transition: 'all 0.2s ease',
-                opacity: (!product?.title || salePrice === 0 || cost === 0) ? 0.5 : 1,
-              }}
-              onMouseEnter={(e) => {
-                if (product?.title && salePrice !== 0 && cost !== 0) {
-                  e.currentTarget.style.transform = 'translateY(-1px)';
-                }
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-              }}
-            >
-              <span style={{ fontSize: '13px' }}>💾</span>
-              저장
-            </button>
-            {/* 초보 모드 토글 */}
-            <button
-              onClick={() => setIsBeginnerMode(!isBeginnerMode)}
-              style={{
-                padding: '8px 10px',
-                fontSize: '12px',
-                fontWeight: 600,
-                border: '1px solid rgba(255, 255, 255, 0.3)',
-                borderRadius: '8px',
-                background: isBeginnerMode ? 'rgba(74, 222, 128, 0.3)' : 'rgba(255, 255, 255, 0.15)',
-                backdropFilter: 'blur(10px)',
-                color: '#ffffff',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '4px',
-                transition: 'all 0.2s ease',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-1px)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-              }}
-            >
-              <span style={{ fontSize: '13px' }}>🎓</span>
-              {isBeginnerMode ? '초보' : '전문'}
-            </button>
-            <button
-              onClick={() => {
-                handleRequestScrape();
-                setSalePriceOverride(null);
-              }}
-            style={{
-              padding: '8px 10px',
-              fontSize: '12px',
-              fontWeight: 600,
-              border: '1px solid rgba(255, 255, 255, 0.3)',
-              borderRadius: '8px',
-              background: 'rgba(255, 255, 255, 0.15)',
-              backdropFilter: 'blur(10px)',
-              color: '#ffffff',
-              cursor: isLoading ? 'not-allowed' : 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '4px',
-              transition: 'all 0.2s ease',
-              opacity: isLoading ? 0.6 : 1,
-            }}
-            disabled={isLoading}
-            onMouseEnter={(e) => {
-              if (!isLoading) {
-                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.25)';
-                e.currentTarget.style.transform = 'translateY(-1px)';
-              }
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.15)';
-              e.currentTarget.style.transform = 'translateY(0)';
-            }}
-          >
-            <span style={{ fontSize: '13px' }}>🔄</span>
-            새로고침
-          </button>
-          </div>
-        </div>
-      </div>
+        onThemeToggle={() => setIsDarkMode(!isDarkMode)}
+      />
 
       {/* 히스토리 UI */}
       {showHistory && (
-        <div style={{
-          margin: '16px',
-          marginBottom: '0',
-          padding: '16px',
-          background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.primaryLight} 100%)`,
-          borderRadius: '16px',
-          border: '2px solid rgba(255, 255, 255, 0.3)',
-          boxShadow: '0 4px 12px rgba(45, 74, 62, 0.2)',
-        }}>
-          <div style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            marginBottom: '12px',
-          }}>
-            <h3 style={{
-              margin: 0,
-              fontSize: '16px',
-              fontWeight: 700,
-              color: '#ffffff',
-            }}>
-              계산 히스토리
-            </h3>
-            {history.length > 0 && (
-              <button
-                onClick={() => {
-                  setHistory([]);
-                  localStorage.removeItem('calculationHistory');
-                }}
-                style={{
-                  padding: '6px 12px',
-                  fontSize: '12px',
-                  fontWeight: 600,
-                  border: '1px solid rgba(255, 255, 255, 0.3)',
-                  borderRadius: '8px',
-                  background: 'rgba(239, 68, 68, 0.2)',
-                  color: '#ffffff',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = 'rgba(239, 68, 68, 0.3)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = 'rgba(239, 68, 68, 0.2)';
-                }}
-              >
-                전체 삭제
-              </button>
-            )}
-          </div>
-
-          {history.length === 0 ? (
-            <div style={{
-              padding: '32px',
-              textAlign: 'center',
-              color: 'rgba(255, 255, 255, 0.6)',
-              fontSize: '14px',
-            }}>
-              저장된 히스토리가 없습니다.
-            </div>
-          ) : (
-            <div style={{
-              maxHeight: '400px',
-              overflowY: 'auto',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '8px',
-            }}>
-              {history.map((item) => {
-                const date = new Date(item.timestamp);
-                const formattedDate = `${date.getMonth() + 1}/${date.getDate()} ${date.getHours()}:${String(date.getMinutes()).padStart(2, '0')}`;
-
-                return (
-                  <div
-                    key={item.id}
-                    style={{
-                      padding: '12px',
-                      background: 'rgba(255, 255, 255, 0.2)',
-                      borderRadius: '12px',
-                      border: '1px solid rgba(255, 255, 255, 0.3)',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s ease',
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.background = 'rgba(255, 255, 255, 0.3)';
-                      e.currentTarget.style.transform = 'translateY(-2px)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.background = 'rgba(255, 255, 255, 0.2)';
-                      e.currentTarget.style.transform = 'translateY(0)';
-                    }}
-                    onClick={() => {
-                      // 히스토리에서 데이터 불러오기
-                      setSalePriceOverride(item.salePrice);
-                      setCost(item.cost);
-                      setExtraCost(item.extraCost);
-                      // productSize 타입 검증
-                      const validSizes: ProductSizeTier[] = ['extra-small', 'small', 'medium', 'large-1', 'large-2', 'extra-large'];
-                      if (validSizes.includes(item.productSize as ProductSizeTier)) {
-                        setProductSize(item.productSize as ProductSizeTier);
-                      }
-                      setShowHistory(false);
-                    }}
-                  >
-                    <div style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'flex-start',
-                      marginBottom: '8px',
-                    }}>
-                      <div style={{
-                        flex: 1,
-                        fontSize: '13px',
-                        fontWeight: 600,
-                        color: '#ffffff',
-                        lineHeight: '1.4',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        display: '-webkit-box',
-                        WebkitLineClamp: 2,
-                        WebkitBoxOrient: 'vertical',
-                      }}>
-                        {item.productTitle || '제목 없음'}
-                      </div>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          const updatedHistory = history.filter(h => h.id !== item.id);
-                          setHistory(updatedHistory);
-                          localStorage.setItem('calculationHistory', JSON.stringify(updatedHistory));
-                        }}
-                        style={{
-                          marginLeft: '8px',
-                          padding: '4px 8px',
-                          fontSize: '11px',
-                          border: '1px solid rgba(255, 255, 255, 0.3)',
-                          borderRadius: '6px',
-                          background: 'rgba(239, 68, 68, 0.2)',
-                          color: '#ffffff',
-                          cursor: 'pointer',
-                          flexShrink: 0,
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.background = 'rgba(239, 68, 68, 0.3)';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.background = 'rgba(239, 68, 68, 0.2)';
-                        }}
-                      >
-                        삭제
-                      </button>
-                    </div>
-                    <div style={{
-                      fontSize: '11px',
-                      color: 'rgba(255, 255, 255, 0.5)',
-                      marginBottom: '8px',
-                    }}>
-                      {formattedDate}
-                    </div>
-                    <div style={{
-                      display: 'grid',
-                      gridTemplateColumns: 'repeat(3, 1fr)',
-                      gap: '8px',
-                    }}>
-                      <div>
-                        <div style={{
-                          fontSize: '10px',
-                          color: 'rgba(255, 255, 255, 0.5)',
-                          marginBottom: '2px',
-                        }}>
-                          마진율
-                        </div>
-                        <div style={{
-                          fontSize: '13px',
-                          fontWeight: 700,
-                          color: item.marginRate >= 15 ? '#4ade80' : item.marginRate >= 10 ? '#fbbf24' : '#f87171',
-                        }}>
-                          {item.marginRate.toFixed(1)}%
-                        </div>
-                      </div>
-                      <div>
-                        <div style={{
-                          fontSize: '10px',
-                          color: 'rgba(255, 255, 255, 0.5)',
-                          marginBottom: '2px',
-                        }}>
-                          순이익
-                        </div>
-                        <div style={{
-                          fontSize: '13px',
-                          fontWeight: 700,
-                          color: item.netProfit >= 0 ? '#4ade80' : '#f87171',
-                        }}>
-                          {item.netProfit.toLocaleString()}원
-                        </div>
-                      </div>
-                      <div>
-                        <div style={{
-                          fontSize: '10px',
-                          color: 'rgba(255, 255, 255, 0.5)',
-                          marginBottom: '2px',
-                        }}>
-                          판매가
-                        </div>
-                        <div style={{
-                          fontSize: '13px',
-                          fontWeight: 600,
-                          color: '#ffffff',
-                        }}>
-                          {item.salePrice.toLocaleString()}원
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
+        <HistoryPanel
+          history={history}
+          onClose={() => setShowHistory(false)}
+          onClearAll={() => {
+            setHistory([]);
+            localStorage.removeItem('calculationHistory');
+          }}
+          onDelete={(id) => {
+            const updatedHistory = history.filter(h => h.id !== id);
+            setHistory(updatedHistory);
+            localStorage.setItem('calculationHistory', JSON.stringify(updatedHistory));
+          }}
+          onSelect={(item) => {
+            setSalePriceOverride(item.salePrice);
+            setCost(item.cost);
+            setExtraCost(item.extraCost);
+            const validSizes: ProductSizeTier[] = ['extra-small', 'small', 'medium', 'large-1', 'large-2', 'extra-large'];
+            if (validSizes.includes(item.productSize as ProductSizeTier)) {
+              setProductSize(item.productSize as ProductSizeTier);
+            }
+            setShowHistory(false);
+          }}
+        />
       )}
 
-      <div style={{ padding: '0 16px 16px' }}>
+      <div className="px-4 pb-4 space-y-4">
 
       {/* 스켈레톤 로딩 상태 */}
       {isLoading && (
-        <>
-          <div style={cardStyle}>
-            <SkeletonBox height="24px" width="60%" />
-            <div style={{ marginTop: '12px' }}>
-              <SkeletonBox height="16px" />
-              <div style={{ marginTop: '8px' }}>
-                <SkeletonBox height="16px" />
-              </div>
-            </div>
-          </div>
-          <div style={cardStyle}>
-            <SkeletonBox height="120px" />
-          </div>
-        </>
+        <div className="space-y-4">
+          <SkeletonCard />
+          <SkeletonCard />
+        </div>
       )}
 
       {/* 에러 메시지 */}
       {error && !isLoading && (
-        <div
-          style={{
-            ...cardStyle,
-            background: colors.dangerBg,
-            border: `2px solid ${colors.dangerBorder}`,
-            color: colors.dangerText,
-          }}
+        <Alert
+          variant="danger"
+          title="오류 발생"
+          action={
+            <button
+              onClick={() => handleRequestScrape()}
+              className="px-4 py-2 text-sm font-semibold rounded-lg border-2 border-brand-danger bg-bg-card text-brand-danger hover:bg-brand-danger hover:text-white transition-colors"
+            >
+              다시 시도
+            </button>
+          }
         >
-          <div style={{ fontWeight: 800, marginBottom: '4px', fontSize: '16px' }}>⚠️ 오류 발생</div>
-          <div style={{ fontSize: '14px', marginBottom: '12px' }}>{error}</div>
-          <button
-            onClick={() => handleRequestScrape()}
-            style={{
-              padding: '10px 20px',
-              fontSize: '13px',
-              fontWeight: 600,
-              border: `2px solid ${colors.danger}`,
-              borderRadius: '8px',
-              background: colors.panel,
-              color: colors.danger,
-              cursor: 'pointer',
-              transition: 'all 0.2s ease',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = colors.danger;
-              e.currentTarget.style.color = 'white';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = colors.panel;
-              e.currentTarget.style.color = colors.danger;
-            }}
-          >
-            다시 시도
-          </button>
-        </div>
+          {error}
+        </Alert>
       )}
 
       {!isLoading && (
         <>
           {isCoupangSeller && (
-            <div
-              style={{
-                ...cardStyle,
-                display: 'grid',
-                gap: '6px',
-                background: colors.dangerBg,
-                border: `2px solid ${colors.dangerBorder}`,
-                color: colors.dangerText,
-                animation: 'slideIn 0.3s ease',
-              }}
-            >
-              <div style={{ fontWeight: 800, fontSize: '15px' }}>⚠️ 쿠팡 직매입 상품</div>
-              <div style={{ fontSize: '13px' }}>
-                자체 공급 상품일 가능성이 높아 마진 확보가 어렵습니다. 다른 상품을 검토해 보세요.
-              </div>
-            </div>
+            <Alert variant="danger" title="쿠팡 직매입 상품">
+              자체 공급 상품일 가능성이 높아 마진 확보가 어렵습니다. 다른 상품을 검토해 보세요.
+            </Alert>
           )}
 
-          {/* 핵심 지표 - 크게 강조 */}
-          <div
-            style={{
-              ...cardStyle,
-              background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.primaryLight} 100%)`,
-              border: 'none',
-              padding: '24px',
-              animation: 'slideIn 0.4s ease',
-            }}
-          >
-            <div style={{ color: 'rgba(255,255,255,0.9)', fontSize: '13px', fontWeight: 600, marginBottom: '12px' }}>
-              📊 예상 수익 분석
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-              <div>
-                <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: '12px', marginBottom: '6px' }}>{getTerm('순이익')}</div>
-                <div style={{
-                  color: 'white',
-                  fontSize: '28px',
-                  fontWeight: 900,
-                  textShadow: '0 2px 8px rgba(0,0,0,0.2)',
-                }}>
-                  {calculation.netProfit >= 0 ? '+' : ''}{formatKRW(animatedProfit)}
-                </div>
-              </div>
-              <div>
-                <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: '12px', marginBottom: '6px' }}>{getTerm('마진율')}</div>
-                <div style={{
-                  color: calculation.marginRate >= targetMarginRate ? colors.accent : colors.warning,
-                  fontSize: '28px',
-                  fontWeight: 900,
-                  textShadow: '0 2px 8px rgba(0,0,0,0.2)',
-                }}>
-                  {formatPercent(animatedMargin)}
-                </div>
-              </div>
-            </div>
+          {/* 핵심 지표 - MarginHero 컴포넌트 */}
+          <MarginHero
+            netProfit={calculation.netProfit}
+            marginRate={calculation.marginRate}
+            targetRate={targetMarginRate}
+            className="animate-slide-in"
+          />
 
-            {/* 마진율 게이지 */}
-            <MarginGauge current={calculation.marginRate} target={targetMarginRate} />
-
-            {/* 마진율 평가 배지 */}
-            <MarginBadge marginRate={calculation.marginRate} targetRate={targetMarginRate} />
-
-            {/* 액션 추천 카드 */}
-            <ActionCard
-              marginRate={calculation.marginRate}
-              netProfit={calculation.netProfit}
-              recommendedMaxCost={recommendedMaxCost}
-            />
-          </div>
+          {/* 액션 추천 카드 */}
+          <ActionCard
+            marginRate={calculation.marginRate}
+            netProfit={calculation.netProfit}
+            recommendedMaxCost={recommendedMaxCost}
+          />
 
           {/* 상품 정보 */}
-          <div style={{ ...cardStyle, animation: 'slideIn 0.5s ease' }}>
-            <div style={{ ...labelStyle, marginBottom: '12px' }}>📦 상품 정보</div>
-            <div style={{ display: 'grid', gap: '8px', fontSize: '14px' }}>
-              {product?.title && (
+          <Card className="animate-slide-in">
+            <CardHeader icon="📦" title="상품 정보" />
+            <CardContent>
+              <div className="space-y-2 text-sm">
+                {product?.title && (
+                  <div>
+                    <span className="text-text-secondary font-semibold">제품명: </span>
+                    <span className="text-text-primary">{product.title}</span>
+                  </div>
+                )}
                 <div>
-                  <span style={{ color: colors.muted, fontWeight: 600 }}>제품명: </span>
-                  <span style={{ color: colors.text }}>{product.title}</span>
+                  <span className="text-text-secondary font-semibold">카테고리: </span>
+                  <span className="text-text-primary">
+                    {categoryName} <span className="text-brand-primary font-bold">({formatPercent(categoryFeeRate * 100)})</span>
+                  </span>
                 </div>
-              )}
-              <div>
-                <span style={{ color: colors.muted, fontWeight: 600 }}>카테고리: </span>
-                <span style={{ color: colors.text }}>
-                  {categoryName} <span style={{ color: colors.accent, fontWeight: 700 }}>({formatPercent(categoryFeeRate * 100)})</span>
-                </span>
-              </div>
-              <div>
-                <span style={{ color: colors.muted, fontWeight: 600 }}>쿠팡 판매가: </span>
-                <span style={{ color: colors.text, fontWeight: 700 }}>{formatKRW(product?.salePrice ?? 0)}</span>
-              </div>
-              <div>
-                <span style={{ color: colors.muted, fontWeight: 600 }}>쿠팡 배송비: </span>
-                <span style={{ color: colors.text }}>
-                  {product?.isFreeShipping ? '무료' : formatKRW(product?.shippingFee ?? 0)}
-                </span>
-              </div>
-              {product?.sellerName && (
                 <div>
-                  <span style={{ color: colors.muted, fontWeight: 600 }}>판매자: </span>
-                  <span style={{ color: colors.text }}>{product.sellerName}</span>
+                  <span className="text-text-secondary font-semibold">쿠팡 판매가: </span>
+                  <span className="text-text-primary font-bold">{formatKRW(product?.salePrice ?? 0)}</span>
                 </div>
-              )}
-            </div>
-          </div>
+                <div>
+                  <span className="text-text-secondary font-semibold">쿠팡 배송비: </span>
+                  <span className="text-text-primary">
+                    {product?.isFreeShipping ? '무료' : formatKRW(product?.shippingFee ?? 0)}
+                  </span>
+                </div>
+                {product?.sellerName && (
+                  <div>
+                    <span className="text-text-secondary font-semibold">판매자: </span>
+                    <span className="text-text-primary">{product.sellerName}</span>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
 
-          {/* 목표 마진율 설정 - 강조 */}
-          <div style={{ ...cardStyle, background: colors.accentSoft, border: `2px solid ${colors.accent}`, animation: 'slideIn 0.6s ease' }}>
-            <div style={{ ...labelStyle, marginBottom: '12px', color: colors.accentText }}>
-              🎯 목표 {getTerm('마진율')} 설정
-              <Tooltip text={isBeginnerMode ? "얼마나 남기고 싶은지 설정하면, 얼마에 사입해야 하는지 알려드려요" : "원하는 수익률을 설정하면 최적 사입가를 계산해드립니다"}>
-                <span style={{ marginLeft: '6px', fontSize: '12px', color: colors.accentText, cursor: 'help' }}>ℹ️</span>
-              </Tooltip>
-            </div>
-            <div style={{ marginBottom: '12px' }}>
-              <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                <input
-                  type="range"
-                  min="0"
-                  max="50"
-                  step="1"
-                  value={targetMarginRate}
-                  onChange={(e) => setTargetMarginRate(parseFloat(e.target.value))}
-                  style={{
-                    flex: 1,
-                    height: '10px',
-                    borderRadius: '5px',
-                    outline: 'none',
-                    cursor: 'pointer',
-                    accentColor: colors.accent,
-                  }}
-                />
-                <div
-                  style={{
-                    fontSize: '24px',
-                    fontWeight: 900,
-                    color: colors.accentText,
-                    minWidth: '70px',
-                    textAlign: 'right',
-                  }}
-                >
-                  {formatPercent(targetMarginRate)}
+          {/* 목표 마진율 설정 */}
+          <Card variant="success" className="animate-slide-in">
+            <CardHeader icon="🎯" title={`목표 ${getTerm('마진율')} 설정`} />
+            <CardContent>
+              <Slider
+                min={0}
+                max={50}
+                step={1}
+                value={targetMarginRate}
+                onChange={setTargetMarginRate}
+                formatValue={(v) => `${v.toFixed(1)}%`}
+                hint={TARGET_MARGIN_HINT_MESSAGE}
+              />
+
+              {/* 추천 최대사입가 */}
+              <div className="mt-4 p-3 bg-bg-elevated rounded-xl border-2 border-brand-primary/30">
+                <div className="text-[13px] font-bold text-brand-primary mb-1">
+                  💡 추천 {getTerm('최대사입가')}
+                </div>
+                <div className="text-[22px] font-black text-brand-primary mb-1">
+                  {formatKRW(recommendedMaxCost)}
+                </div>
+                <div className="text-[11px] text-text-secondary">
+                  목표 {getTerm('마진율')} {formatPercent(targetMarginRate)}를 달성하려면 이 가격 이하로 사입하세요
                 </div>
               </div>
-              {/* 목표 마진율 힌트 */}
-              <div style={{ fontSize: '11px', color: colors.accentText, marginTop: '8px', opacity: 0.8 }}>
-                {TARGET_MARGIN_HINT_MESSAGE}
-              </div>
-            </div>
-            <div
-              style={{
-                fontSize: '12px',
-                background: 'white',
-                border: `2px solid ${colors.accent}`,
-                borderRadius: '12px',
-                padding: '14px',
-              }}
-            >
-              <div style={{ fontWeight: 700, marginBottom: '6px', color: colors.accentText, fontSize: '13px' }}>
-                💡 추천 {getTerm('최대사입가')}
-              </div>
-              <div style={{ fontSize: '22px', fontWeight: 900, color: colors.accentText, marginBottom: '6px' }}>
-                {formatKRW(recommendedMaxCost)}
-              </div>
-              <div style={{ fontSize: '11px', color: colors.accentText }}>
-                목표 {getTerm('마진율')} {formatPercent(targetMarginRate)}를 달성하려면 이 가격 이하로 사입하세요
-              </div>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
 
           {/* 비용 입력 */}
-          <div style={{ ...cardStyle, animation: 'slideIn 0.7s ease' }}>
-            <div style={{ ...labelStyle, marginBottom: '12px' }}>💰 가격 및 비용 입력</div>
+          <Card className="animate-slide-in">
+            <CardHeader icon="💰" title="가격 및 비용 입력" />
+            <CardContent>
+              <Input
+                label={`${getTerm('판매가')}${product?.salePrice ? ` (쿠팡: ${formatKRW(product.salePrice)})` : ''}`}
+                value={salePrice === 0 ? '' : formatInput(salePrice)}
+                onChange={(v) => setSalePriceOverride(toNumber(v))}
+                placeholder="0"
+                variant="highlighted"
+              />
 
-            <div style={{ marginBottom: '12px' }}>
-              <div style={{ ...labelStyle, fontSize: '12px' }}>
-                {getTerm('판매가')} {product?.salePrice && <span style={{ fontSize: '11px', color: colors.muted, fontWeight: 400 }}>(쿠팡: {formatKRW(product.salePrice)})</span>}
-              </div>
-              <div style={{
-                ...valueBox,
-                border: `2px solid ${colors.accent}`,
-                transition: 'all 0.2s ease',
-              }}
-                onFocus={(e) => e.currentTarget.style.boxShadow = `0 0 0 3px ${colors.accentSoft}`}
-                onBlur={(e) => e.currentTarget.style.boxShadow = 'none'}
-              >
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  placeholder="0"
-                  value={salePrice === 0 ? '' : formatInput(salePrice)}
-                  onChange={(e) => setSalePriceOverride(toNumber(e.target.value))}
-                  style={{
-                    border: 'none',
-                    background: 'transparent',
-                    width: '100%',
-                    textAlign: 'right',
-                    fontSize: '18px',
-                    fontWeight: 700,
-                    color: colors.text,
-                    outline: 'none',
-                  }}
-                />
-                <span style={{ marginLeft: '6px', color: colors.text, fontSize: '14px' }}>원</span>
-              </div>
-            </div>
+              <Input
+                label={`원가 (${getTerm('사입가')})`}
+                value={cost === 0 ? '' : formatInput(cost)}
+                onChange={(v) => setCost(toNumber(v))}
+                placeholder="0"
+                hint={COST_HINT_MESSAGE}
+              />
 
-            <div style={{ marginBottom: '12px' }}>
-              <div style={{ ...labelStyle, fontSize: '12px' }}>원가 ({getTerm('사입가')})</div>
-              <div style={valueBox}>
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  placeholder="0"
-                  value={cost === 0 ? '' : formatInput(cost)}
-                  onChange={(e) => setCost(toNumber(e.target.value))}
-                  style={{
-                    border: 'none',
-                    background: 'transparent',
-                    width: '100%',
-                    textAlign: 'right',
-                    fontSize: '18px',
-                    fontWeight: 700,
-                    color: colors.text,
-                    outline: 'none',
-                  }}
-                />
-                <span style={{ marginLeft: '6px', color: colors.text, fontSize: '14px' }}>원</span>
-              </div>
-              {/* 사입가 힌트 */}
-              <div style={{ fontSize: '11px', color: colors.muted, marginTop: '6px' }}>
-                {COST_HINT_MESSAGE}
-              </div>
-            </div>
-
-            <div>
-              <div style={{ ...labelStyle, fontSize: '12px' }}>기타 비용</div>
-              <div style={valueBox}>
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  placeholder="0"
-                  value={extraCost === 0 ? '' : formatInput(extraCost)}
-                  onChange={(e) => setExtraCost(toNumber(e.target.value))}
-                  style={{
-                    border: 'none',
-                    background: 'transparent',
-                    width: '100%',
-                    textAlign: 'right',
-                    fontSize: '18px',
-                    fontWeight: 700,
-                    color: colors.text,
-                    outline: 'none',
-                  }}
-                />
-                <span style={{ marginLeft: '6px', color: colors.text, fontSize: '14px' }}>원</span>
-              </div>
-            </div>
-          </div>
+              <Input
+                label="기타 비용"
+                value={extraCost === 0 ? '' : formatInput(extraCost)}
+                onChange={(v) => setExtraCost(toNumber(v))}
+                placeholder="0"
+              />
+            </CardContent>
+          </Card>
 
           {/* 상품 크기 선택 */}
-          <div style={{ ...cardStyle, animation: 'slideIn 0.8s ease' }}>
-            <div style={{ ...labelStyle, marginBottom: '12px' }}>
-              📏 상품 크기 선택
-              <Tooltip text="상품의 실제 크기에 따라 물류비가 달라집니다">
-                <span style={{ marginLeft: '6px', fontSize: '12px', color: colors.muted, cursor: 'help' }}>ℹ️</span>
-              </Tooltip>
-            </div>
-            <div style={{ marginBottom: '12px' }}>
-              <select
+          <Card className="animate-slide-in">
+            <CardHeader icon="📏" title="상품 크기 선택" />
+            <CardContent>
+              <Select
                 value={productSize}
-                onChange={(e) => setProductSize(e.target.value as ProductSizeTier)}
-                style={{
-                  width: '100%',
-                  padding: '14px',
-                  fontSize: '15px',
-                  fontWeight: 600,
-                  border: `2px solid ${colors.accent}`,
-                  borderRadius: '10px',
-                  background: colors.panel,
-                  color: colors.text,
-                  cursor: 'pointer',
-                  outline: 'none',
-                  transition: 'all 0.2s ease',
-                }}
-                onFocus={(e) => e.currentTarget.style.boxShadow = `0 0 0 3px ${colors.accentSoft}`}
-                onBlur={(e) => e.currentTarget.style.boxShadow = 'none'}
-              >
-                {sizeOptions.map(([key, value]) => {
-                  const fee = getLogisticsFee(salePrice || 25800, key);
-                  return (
-                    <option key={key} value={key}>
-                      {value.label} - {formatKRW(fee)}
-                    </option>
-                  );
-                })}
-              </select>
-            </div>
-            <div
-              style={{
-                fontSize: '12px',
-                color: colors.muted,
-                background: colors.infoBg,
-                border: `1px solid ${colors.infoBorder}`,
-                borderRadius: '8px',
-                padding: '12px',
-              }}
-            >
-              <div style={{ fontWeight: 700, marginBottom: '6px', color: colors.infoText }}>
-                💡 {PRODUCT_SIZE_INFO[productSize].label} - {formatKRW(currentLogisticsFee)} (부가세 포함)
+                onChange={(v) => setProductSize(v as ProductSizeTier)}
+                options={sizeOptions.map(([key, value]) => ({
+                  value: key,
+                  label: `${value.label} - ${formatKRW(getLogisticsFee(salePrice || 25800, key))}`,
+                }))}
+              />
+
+              {/* 선택된 크기 정보 */}
+              <div className="p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+                <div className="text-xs font-bold text-blue-400 mb-1">
+                  💡 {PRODUCT_SIZE_INFO[productSize].label} - {formatKRW(currentLogisticsFee)} (부가세 포함)
+                </div>
+                <div className="text-[11px] text-blue-400/80">
+                  {PRODUCT_SIZE_INFO[productSize].description}
+                </div>
               </div>
-              <div style={{ color: colors.infoText, marginBottom: '6px', fontSize: '11px' }}>
-                {PRODUCT_SIZE_INFO[productSize].description}
-              </div>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
 
           {/* 비용 구성 시각화 */}
-          <div style={{ ...cardStyle, animation: 'slideIn 0.9s ease' }}>
-            <div style={{ ...labelStyle, marginBottom: '12px' }}>📈 비용 구성 비율</div>
+          <Card className="animate-slide-in">
+            <CardHeader icon="📈" title="비용 구성 비율" />
             <DonutChart
               salesFee={calculation.totalSalesFee}
               logisticsFee={calculation.totalLogisticsFee}
               profit={calculation.netProfit}
             />
-          </div>
+          </Card>
 
           {/* 수수료 상세 - 아코디언 */}
-          <div style={{ ...cardStyle, animation: 'slideIn 1s ease' }}>
+          <Card className="animate-slide-in">
             <Accordion title={`📊 ${getTerm('로켓그로스')} 수수료 상세`} defaultOpen={false}>
-              <div style={{ display: 'grid', gap: '8px' }}>
-                <div style={{ fontSize: '12px', fontWeight: 700, color: colors.muted, marginBottom: '4px' }}>
+              <div className="space-y-2">
+                <div className="text-xs font-bold text-text-secondary mb-1">
                   {getTerm('판매수수료')}
                 </div>
-                <div style={{ ...valueBox, background: '#fef9f5', padding: '10px 12px', border: 'none' }}>
-                  <span style={{ fontSize: '13px', color: colors.muted, fontWeight: 600 }}>{getTerm('판매수수료')} ({formatPercent(categoryFeeRate * 100)})</span>
-                  <span style={{ fontSize: '15px' }}>{formatKRW(calculation.salesCommission)}</span>
+                <div className="flex justify-between items-center p-2.5 bg-brand-warning/10 rounded-lg">
+                  <span className="text-[13px] text-text-secondary font-semibold">{getTerm('판매수수료')} ({formatPercent(categoryFeeRate * 100)})</span>
+                  <span className="text-[15px] text-text-primary">{formatKRW(calculation.salesCommission)}</span>
                 </div>
-                <div style={{ ...valueBox, background: '#fef9f5', padding: '10px 12px', border: 'none' }}>
-                  <span style={{ fontSize: '13px', color: colors.muted, fontWeight: 600 }}>{getTerm('부가세')} (10%)</span>
-                  <span style={{ fontSize: '15px' }}>{formatKRW(calculation.vat)}</span>
+                <div className="flex justify-between items-center p-2.5 bg-brand-warning/10 rounded-lg">
+                  <span className="text-[13px] text-text-secondary font-semibold">{getTerm('부가세')} (10%)</span>
+                  <span className="text-[15px] text-text-primary">{formatKRW(calculation.vat)}</span>
                 </div>
-                <div
-                  style={{
-                    ...valueBox,
-                    background: colors.warningBg,
-                    border: `2px solid ${colors.warningBorder}`,
-                    padding: '10px 12px',
-                  }}
-                >
-                  <span style={{ fontSize: '13px', color: colors.warningText, fontWeight: 700 }}>{getTerm('판매수수료')} 소계</span>
-                  <span style={{ fontSize: '16px', color: colors.warningText }}>{formatKRW(calculation.totalSalesFee)}</span>
+                <div className="flex justify-between items-center p-2.5 bg-brand-warning/20 border-2 border-brand-warning/50 rounded-lg">
+                  <span className="text-[13px] text-brand-warning font-bold">{getTerm('판매수수료')} 소계</span>
+                  <span className="text-[16px] text-brand-warning font-bold">{formatKRW(calculation.totalSalesFee)}</span>
                 </div>
 
-                <div style={{ fontSize: '12px', fontWeight: 700, color: colors.muted, marginTop: '8px', marginBottom: '4px' }}>
+                <div className="text-xs font-bold text-text-secondary mt-3 mb-1">
                   {getTerm('물류비')} ({PRODUCT_SIZE_INFO[productSize].label}, {getTerm('부가세')} 포함)
                 </div>
-                <div style={{ ...valueBox, background: '#f0fdf4', padding: '10px 12px', border: 'none' }}>
-                  <span style={{ fontSize: '13px', color: colors.muted, fontWeight: 600 }}>{getTerm('입출고요금')}</span>
-                  <span style={{ fontSize: '15px' }}>{formatKRW(calculation.logisticsInbound)}</span>
+                <div className="flex justify-between items-center p-2.5 bg-brand-primary/10 rounded-lg">
+                  <span className="text-[13px] text-text-secondary font-semibold">{getTerm('입출고요금')}</span>
+                  <span className="text-[15px] text-text-primary">{formatKRW(calculation.logisticsInbound)}</span>
                 </div>
-                <div style={{ ...valueBox, background: '#f0fdf4', padding: '10px 12px', border: 'none' }}>
-                  <span style={{ fontSize: '13px', color: colors.muted, fontWeight: 600 }}>{getTerm('배송비')}</span>
-                  <span style={{ fontSize: '15px' }}>{formatKRW(calculation.logisticsShipping)}</span>
+                <div className="flex justify-between items-center p-2.5 bg-brand-primary/10 rounded-lg">
+                  <span className="text-[13px] text-text-secondary font-semibold">{getTerm('배송비')}</span>
+                  <span className="text-[15px] text-text-primary">{formatKRW(calculation.logisticsShipping)}</span>
                 </div>
-                <div
-                  style={{
-                    ...valueBox,
-                    background: colors.successBg,
-                    border: `2px solid ${colors.successBorder}`,
-                    padding: '10px 12px',
-                  }}
-                >
-                  <span style={{ fontSize: '13px', color: colors.successText, fontWeight: 700 }}>{getTerm('물류비')} 소계</span>
-                  <span style={{ fontSize: '16px', color: colors.successText }}>{formatKRW(calculation.totalLogisticsFee)}</span>
+                <div className="flex justify-between items-center p-2.5 bg-brand-primary/20 border-2 border-brand-primary/50 rounded-lg">
+                  <span className="text-[13px] text-brand-primary font-bold">{getTerm('물류비')} 소계</span>
+                  <span className="text-[16px] text-brand-primary font-bold">{formatKRW(calculation.totalLogisticsFee)}</span>
                 </div>
 
-                <div
-                  style={{
-                    ...valueBox,
-                    background: colors.dangerBg,
-                    border: `2px solid ${colors.dangerBorder}`,
-                    marginTop: '8px',
-                  }}
-                >
-                  <span style={{ fontSize: '15px', color: colors.dangerText, fontWeight: 800 }}>총 수수료</span>
-                  <span style={{ fontSize: '20px', color: colors.dangerText, fontWeight: 800 }}>{formatKRW(calculation.totalFee)}</span>
+                <div className="flex justify-between items-center p-3 mt-2 bg-brand-danger/20 border-2 border-brand-danger/50 rounded-lg">
+                  <span className="text-[15px] text-brand-danger font-extrabold">총 수수료</span>
+                  <span className="text-[20px] text-brand-danger font-extrabold">{formatKRW(calculation.totalFee)}</span>
                 </div>
               </div>
             </Accordion>
-          </div>
+          </Card>
 
           {/* 최대 사입가 안내 */}
-          <div
-            style={{
-              ...cardStyle,
-              background: colors.infoBg,
-              border: `2px solid ${colors.infoBorder}`,
-              animation: 'slideIn 1.1s ease',
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: '12px', color: colors.infoText, fontWeight: 600, marginBottom: '6px' }}>
-                  💡 최대 사입가 (마진 0% 기준)
-                </div>
-                <div style={{ fontSize: '24px', color: colors.infoText, fontWeight: 900 }}>
-                  {formatKRW(calculation.maxPurchasePrice)}
-                </div>
-                <div style={{ fontSize: '11px', color: colors.infoText, marginTop: '6px' }}>
-                  이 가격보다 낮게 사입하면 이익이 발생합니다
-                </div>
-              </div>
+          <Card variant="info" className="animate-slide-in">
+            <div className="text-xs text-blue-400 font-semibold mb-1">
+              💡 최대 사입가 (마진 0% 기준)
             </div>
-          </div>
+            <div className="text-2xl text-blue-400 font-black">
+              {formatKRW(calculation.maxPurchasePrice)}
+            </div>
+            <div className="text-[11px] text-blue-400/80 mt-1">
+              이 가격보다 낮게 사입하면 이익이 발생합니다
+            </div>
+          </Card>
         </>
       )}
       </div>

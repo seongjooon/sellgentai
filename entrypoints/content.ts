@@ -1,11 +1,12 @@
 import type { CommonProductData } from './sidebar/types';
+import { browser } from 'wxt/browser';
 
 export default defineContentScript({
   matches: ['*://*.coupang.com/*'],
   main() {
     const SIDEBAR_ID = 'marginscan-sidebar';
     const SIDEBAR_WIDTH = 360;
-    const sidebarUrl = chrome.runtime.getURL('sidebar.html');
+    const sidebarUrl = browser.runtime.getURL('/sidebar.html');
     const sidebarOrigin = new URL(sidebarUrl).origin;
     const initialHtmlPaddingRight = getComputedStyle(document.documentElement).paddingRight;
     // const initialBodyPaddingRight = getComputedStyle(document.body).paddingRight;
@@ -222,7 +223,7 @@ export default defineContentScript({
       mountSidebar();
     }
 
-    chrome.runtime.onMessage.addListener((message) => {
+    browser.runtime.onMessage.addListener((message: { type?: string }) => {
       if (message?.type === 'toggle-sidebar') {
         toggleSidebar();
       }

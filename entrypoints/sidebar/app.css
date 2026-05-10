@@ -1,0 +1,299 @@
+@import 'tailwindcss';
+
+/* ============================================
+   Cal AI Design System - Theme Configuration
+   ============================================ */
+
+@theme {
+  /* Brand Colors - Same for both modes */
+  --color-brand-primary: #00D084;
+  --color-brand-primary-dark: #00B872;
+  --color-brand-secondary: #FF6B35;
+  --color-brand-danger: #FF3B30;
+  --color-brand-warning: #FFB84D;
+
+  /* Dark Mode Colors (Default) */
+  --color-bg-primary: #0A0E14;
+  --color-bg-secondary: #151921;
+  --color-bg-tertiary: #1E2430;
+  --color-bg-elevated: #252C3A;
+  --color-bg-card: #1C1F26;
+
+  --color-text-primary: #FFFFFF;
+  --color-text-secondary: #8B92A0;
+  --color-text-tertiary: #5A6170;
+
+  --color-border: #2D3340;
+  --color-border-light: #3A4252;
+
+  /* Light Mode Colors */
+  --color-bg-primary-light: #FFFFFF;
+  --color-bg-secondary-light: #F8F9FA;
+  --color-bg-tertiary-light: #F1F3F5;
+  --color-bg-elevated-light: #FFFFFF;
+  --color-bg-card-light: #FFFFFF;
+
+  --color-text-primary-light: #1A1D1F;
+  --color-text-secondary-light: #6C757D;
+  --color-text-tertiary-light: #ADB5BD;
+
+  --color-border-light-mode: #DEE2E6;
+  --color-border-light-elevated: #CED4DA;
+
+  /* Spacing */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 12px;
+  --spacing-lg: 16px;
+  --spacing-xl: 24px;
+  --spacing-2xl: 32px;
+
+  /* Border Radius */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+
+  /* Shadows */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
+  --shadow-glow: 0 0 0 3px rgba(0, 208, 132, 0.1);
+
+  /* Font Families */
+  --font-sans: 'Pretendard Variable', 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  /* Animations */
+  --animate-glow-pulse: glow-pulse 3s ease-in-out infinite;
+  --animate-value-appear: value-appear 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+  --animate-progress-slide: progress-slide 1.2s ease-out;
+  --animate-badge-pop: badge-pop 0.5s ease-out 0.3s both;
+  --animate-loading: loading 1.5s ease-in-out infinite;
+  --animate-shimmer: shimmer 1.5s ease-in-out infinite;
+  --animate-slide-in: slide-in 0.3s ease-out;
+
+  /* Keyframes */
+  @keyframes glow-pulse {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 0.8; }
+  }
+
+  @keyframes value-appear {
+    0% { transform: scale(0.5); opacity: 0; }
+    60% { transform: scale(1.1); }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  @keyframes progress-slide {
+    from { width: 0%; }
+  }
+
+  @keyframes badge-pop {
+    0% { transform: scale(0.8); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  @keyframes loading {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+
+  @keyframes slide-in {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+}
+
+/* ============================================
+   Custom Utility Classes
+   ============================================ */
+
+@utility text-gradient-primary {
+  background: linear-gradient(135deg, #00D084, #00F5A0);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+@utility text-gradient-warning {
+  background: linear-gradient(135deg, #FFB84D, #FFD700);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+@utility text-gradient-danger {
+  background: linear-gradient(135deg, #FF3B30, #FF6B6B);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+@utility bg-glow-primary {
+  background: radial-gradient(
+    circle at 50% 0%,
+    rgba(0, 208, 132, 0.12) 0%,
+    transparent 60%
+  );
+}
+
+@utility gauge-fill-primary {
+  background: linear-gradient(90deg, #00D084, #00F5A0);
+}
+
+@utility gauge-fill-warning {
+  background: linear-gradient(90deg, #FFB84D, #FFD700);
+}
+
+@utility gauge-fill-danger {
+  background: linear-gradient(90deg, #FF3B30, #FF6B6B);
+}
+
+@utility skeleton-bg {
+  background: linear-gradient(
+    90deg,
+    #1E2430 25%,
+    #252C3A 50%,
+    #1E2430 75%
+  );
+  background-size: 200% 100%;
+}
+
+/* ============================================
+   Custom Scrollbar
+   ============================================ */
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: var(--color-bg-primary);
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--color-bg-tertiary);
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--color-bg-elevated);
+}
+
+/* ============================================
+   Input Focus Styles
+   ============================================ */
+
+.input-glow:focus {
+  outline: none;
+  border-color: var(--color-brand-primary);
+  background: var(--color-bg-elevated);
+  box-shadow: var(--shadow-glow);
+}
+
+/* ============================================
+   Custom Slider Styles
+   ============================================ */
+
+.slider-custom {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  background: var(--color-bg-primary);
+  border-radius: 3px;
+  outline: none;
+}
+
+.slider-custom::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  background: linear-gradient(135deg, #00D084, #00F5A0);
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 208, 132, 0.4);
+}
+
+.slider-custom::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  background: linear-gradient(135deg, #00D084, #00F5A0);
+  border-radius: 50%;
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 2px 8px rgba(0, 208, 132, 0.4);
+}
+
+/* ============================================
+   Glow Border Effect
+   ============================================ */
+
+.border-glow {
+  position: relative;
+}
+
+.border-glow::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -1px;
+  width: 1px;
+  height: 100%;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    var(--color-brand-primary) 50%,
+    transparent 100%
+  );
+  opacity: 0.5;
+  animation: glow-pulse 3s ease-in-out infinite;
+}
+
+/* ============================================
+   Base Layer Styles
+   ============================================ */
+
+@layer base {
+  body {
+    font-family: var(--font-sans);
+    background: linear-gradient(135deg, var(--color-bg-primary) 0%, #1a1f2e 100%);
+    color: var(--color-text-primary);
+    line-height: 1.6;
+  }
+
+  /* Light Mode Overrides */
+  body.light-mode {
+    --color-bg-primary: var(--color-bg-primary-light);
+    --color-bg-secondary: var(--color-bg-secondary-light);
+    --color-bg-tertiary: var(--color-bg-tertiary-light);
+    --color-bg-elevated: var(--color-bg-elevated-light);
+    --color-bg-card: var(--color-bg-card-light);
+
+    --color-text-primary: var(--color-text-primary-light);
+    --color-text-secondary: var(--color-text-secondary-light);
+    --color-text-tertiary: var(--color-text-tertiary-light);
+
+    --color-border: var(--color-border-light-mode);
+    --color-border-light: var(--color-border-light-elevated);
+
+    background: linear-gradient(135deg, #FFFFFF 0%, #F8F9FA 100%);
+  }
+
+  body.light-mode .skeleton-bg {
+    background: linear-gradient(
+      90deg,
+      #F1F3F5 25%,
+      #E9ECEF 50%,
+      #F1F3F5 75%
+    );
+    background-size: 200% 100%;
+  }
+}

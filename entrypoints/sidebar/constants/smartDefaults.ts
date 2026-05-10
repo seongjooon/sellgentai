@@ -17,13 +17,13 @@ export const DEFAULT_COST_RATIO = 0.6;
  * 카테고리 특성에 따라 일반적인 크기를 추정
  */
 export const CATEGORY_SIZE_DEFAULTS: Record<string, ProductSizeTier> = {
-  // 작은 크기 (small, extraSmall)
+  // 작은 크기 (small, extra-small)
   화장품: 'small',
   뷰티: 'small',
   향수: 'small',
   액세서리: 'small',
-  귀걸이: 'extraSmall',
-  반지: 'extraSmall',
+  귀걸이: 'extra-small',
+  반지: 'extra-small',
   목걸이: 'small',
   팔찌: 'small',
   시계: 'small',
@@ -41,13 +41,13 @@ export const CATEGORY_SIZE_DEFAULTS: Record<string, ProductSizeTier> = {
   문구: 'medium',
   도서: 'medium',
 
-  // 큰 크기 (large, extraLarge)
-  가전제품: 'large',
-  스포츠: 'large',
-  캠핑: 'extraLarge',
-  가구: 'extraLarge',
-  침구: 'large',
-  인테리어: 'large',
+  // 큰 크기 (large-1, extra-large)
+  가전제품: 'large-1',
+  스포츠: 'large-1',
+  캠핑: 'extra-large',
+  가구: 'extra-large',
+  침구: 'large-1',
+  인테리어: 'large-1',
 };
 
 /**
