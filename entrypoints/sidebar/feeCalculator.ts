@@ -449,13 +449,14 @@ export function calculateRocketGrossFees(params: FeeCalculationParams): FeeCalcu
     productSize,
   } = params;
 
-  // 1. 판매 수수료 (카테고리별)
-  const salesCommission = salePrice * categoryFeeRate;
+  // 1. 판매 수수료 (카테고리별, 원 단위 반올림)
+  // 쿠팡은 수수료를 원 단위로 청구하므로 소수점을 남기지 않는다.
+  const salesCommission = Math.round(salePrice * categoryFeeRate);
 
-  // 2. 부가세 (수수료의 10%)
-  const vat = salesCommission * 0.1;
+  // 2. 부가세 (수수료의 10%, 원 단위 반올림)
+  const vat = Math.round(salesCommission * 0.1);
 
-  // 3. 총 판매 수수료
+  // 3. 총 판매 수수료 (반올림된 정수 값의 합이므로 추가 반올림 불필요)
   const totalSalesFee = salesCommission + vat;
 
   // 4. 물류비 (가격대 + 크기별, 부가세 포함)
