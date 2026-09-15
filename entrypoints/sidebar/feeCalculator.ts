@@ -105,6 +105,15 @@ export const CATEGORY_FEE_RATES: Record<string, number> = {
   '음료': 0.106,
   '건강식품': 0.106,
   '영양제': 0.106,
+  // 커피는 식품 기본 수수료 적용 (2026-09-15 운영자 결정, 공식표 식품 10.6%: https://cloud.mkt.coupang.com/Fee-Table)
+  '커피': 0.106,
+  '원두': 0.106,
+  '캡슐커피': 0.106,
+  '원두커피': 0.106,
+  '드립커피': 0.106,
+  '인스턴트커피': 0.106,
+  '액상커피': 0.106,
+  '커피믹스': 0.106,
 
   // 완구/취미
   '완구': 0.108,
@@ -165,6 +174,12 @@ export const DEFAULT_FEE_RATE = 0.10; // 10%
  */
 const MIN_SUBSTRING_KEYWORD_LENGTH = 2;
 
+/**
+ * 두 글자 이상이어도 단계 이름과 정확히 같을 때만 쓰는 키워드.
+ * '커피머신', '원두분쇄기' 같은 기기(가전·주방)가 식품 수수료로 잡히지 않게 한다.
+ */
+const EXACT_ONLY_KEYWORDS = new Set(['커피', '원두']);
+
 /** 비교용 정규화 (앞뒤 공백·내부 공백·괄호 제거, 소문자) */
 function normalizeCategory(value: string): string {
   return value
@@ -208,7 +223,8 @@ function findCategoryKeyword(categories: string[]): string | null {
     let longest: (typeof NORMALIZED_KEYWORDS)[number] | null = null;
     for (const entry of NORMALIZED_KEYWORDS) {
       const length = [...entry.normalized].length;
-      if (length < MIN_SUBSTRING_KEYWORD_LENGTH || !token.includes(entry.normalized)) continue;
+      if (length < MIN_SUBSTRING_KEYWORD_LENGTH || EXACT_ONLY_KEYWORDS.has(entry.keyword)) continue;
+      if (!token.includes(entry.normalized)) continue;
       if (!longest || length > [...longest.normalized].length) longest = entry;
     }
     if (longest) return longest.keyword;
