@@ -61,8 +61,10 @@
   --shadow-glow: 0 0 0 3px rgba(0, 208, 132, 0.1);
 
   /* Font Families */
-  --font-sans: 'Pretendard Variable', 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
+  /* 원격 폰트를 불러오지 않는다. 설치된 로컬 폰트가 없으면 OS 기본 한글 폰트로 표시 */
+  --font-sans: 'Pretendard Variable', 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui,
+    'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 
   /* Animations */
   --animate-glow-pulse: glow-pulse 3s ease-in-out infinite;
