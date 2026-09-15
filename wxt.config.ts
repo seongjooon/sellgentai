@@ -8,7 +8,7 @@ export default defineConfig({
   manifest: {
     name: 'Sellgent AI - 쿠팡 로켓그로스 마진 계산기',
     description: '쿠팡 로켓그로스 셀러를 위한 실시간 마진 계산 도구. 카테고리별 수수료와 물류비를 자동으로 계산하여 예상 수익을 분석합니다.',
-    version: '1.2.0',
+    version: '1.2.1',
     default_locale: 'ko',
     permissions: ['activeTab'],
     host_permissions: ['*://*.coupang.com/*'],
