@@ -8,8 +8,8 @@
 /**
  * 카테고리별 판매 수수료율 매핑 테이블
  *
- * breadcrumb나 카테고리 텍스트에서 키워드를 찾아 매칭
- * 여러 키워드가 매칭되면 가장 구체적인(먼저 매칭된) 수수료율 사용
+ * breadcrumb 단계에서 키워드를 찾아 매칭 (규칙은 findCategoryKeyword 참고)
+ * 한 글자 키워드는 단계 이름과 정확히 같을 때만 매칭된다
  */
 export const CATEGORY_FEE_RATES: Record<string, number> = {
   // 가전/디지털 (정밀기기)
@@ -159,52 +159,87 @@ export const CATEGORY_FEE_RATES: Record<string, number> = {
 export const DEFAULT_FEE_RATE = 0.10; // 10%
 
 /**
+ * 부분 문자열 매칭에 쓸 수 있는 키워드 최소 길이.
+ * 한 글자 키워드('카', '책', '옷', '펫')를 부분 문자열로 쓰면
+ * '홈카페 → 카', '책상 → 책', '카펫 → 펫' 같은 오탐이 나서 정확히 같을 때만 쓴다.
+ */
+const MIN_SUBSTRING_KEYWORD_LENGTH = 2;
+
+/** 비교용 정규화 (앞뒤 공백·내부 공백·괄호 제거, 소문자) */
+function normalizeCategory(value: string): string {
+  return value
+    .trim()
+    .toLocaleLowerCase('ko-KR')
+    .replace(/[\s_\-()[\]{}]/g, '');
+}
+
+/** '원두/커피' 처럼 한 칸에 여러 단계가 들어 있으면 나눈다 */
+function getCategoryTokens(categories: string[]): string[] {
+  return categories.flatMap((category) =>
+    category
+      .split(/[>／/|·]/)
+      .map(normalizeCategory)
+      .filter(Boolean),
+  );
+}
+
+const NORMALIZED_KEYWORDS = Object.keys(CATEGORY_FEE_RATES).map((keyword) => ({
+  keyword,
+  normalized: normalizeCategory(keyword),
+}));
+
+/**
+ * 카테고리 경로에서 수수료 키워드 찾기
+ *
+ * 더 구체적인 뒤쪽 단계부터 본다. 한 단계 안에서는
+ * 1) 단계 이름과 정확히 같은 키워드
+ * 2) 두 글자 이상 키워드의 부분 일치 중 가장 긴 키워드 (예: '건강식품'이 '건강'보다 우선)
+ * 순서로 고른다.
+ */
+function findCategoryKeyword(categories: string[]): string | null {
+  const tokens = getCategoryTokens(categories || []);
+
+  for (let i = tokens.length - 1; i >= 0; i--) {
+    const token = tokens[i];
+
+    const exact = NORMALIZED_KEYWORDS.find(({ normalized }) => normalized === token);
+    if (exact) return exact.keyword;
+
+    let longest: (typeof NORMALIZED_KEYWORDS)[number] | null = null;
+    for (const entry of NORMALIZED_KEYWORDS) {
+      const length = [...entry.normalized].length;
+      if (length < MIN_SUBSTRING_KEYWORD_LENGTH || !token.includes(entry.normalized)) continue;
+      if (!longest || length > [...longest.normalized].length) longest = entry;
+    }
+    if (longest) return longest.keyword;
+  }
+
+  return null;
+}
+
+/**
  * 카테고리 배열에서 수수료율 추출
  *
  * @param categories - breadcrumb에서 추출한 카테고리 배열
  * @returns 매칭된 수수료율 (0~1 사이의 소수)
  */
 export function getCategoryFeeRate(categories: string[]): number {
-  if (!categories || categories.length === 0) {
-    return DEFAULT_FEE_RATE;
-  }
-
-  // 카테고리 배열을 역순으로 검색 (더 구체적인 카테고리가 뒤에 있음)
-  for (let i = categories.length - 1; i >= 0; i--) {
-    const category = categories[i];
-
-    // 카테고리 텍스트에서 키워드 매칭
-    for (const [keyword, rate] of Object.entries(CATEGORY_FEE_RATES)) {
-      if (category.includes(keyword)) {
-        return rate;
-      }
-    }
-  }
-
-  return DEFAULT_FEE_RATE;
+  const keyword = findCategoryKeyword(categories);
+  return keyword ? CATEGORY_FEE_RATES[keyword] : DEFAULT_FEE_RATE;
 }
 
 /**
  * 매칭된 카테고리 키워드 찾기 (UI 표시용)
  *
  * @param categories - breadcrumb에서 추출한 카테고리 배열
- * @returns 매칭된 카테고리 키워드 또는 '기타'
+ * @returns 매칭된 카테고리 키워드, 없으면 마지막 카테고리 이름 또는 '기타'
  */
 export function getMatchedCategoryName(categories: string[]): string {
   if (!categories || categories.length === 0) {
     return '기타';
   }
 
-  for (let i = categories.length - 1; i >= 0; i--) {
-    const category = categories[i];
-    for (const keyword of Object.keys(CATEGORY_FEE_RATES)) {
-      if (category.includes(keyword)) {
-        return keyword;
-      }
-    }
-  }
-
-  return categories[categories.length - 1] || '기타';
+  return findCategoryKeyword(categories) ?? (categories[categories.length - 1] || '기타');
 }
 
 /**

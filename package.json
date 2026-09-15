@@ -12,6 +12,7 @@
     "zip": "wxt zip",
     "zip:firefox": "wxt zip -b firefox",
     "compile": "tsc --noEmit",
+    "test:category": "node --experimental-strip-types --no-warnings scripts/verify-category.mjs",
     "postinstall": "wxt prepare"
   },
   "dependencies": {
