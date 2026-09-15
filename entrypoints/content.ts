@@ -1,4 +1,5 @@
 import type { CommonProductData } from './sidebar/types';
+import { pickOfferPrice, toPositivePrice } from '../lib/coupangPrice';
 import { browser } from 'wxt/browser';
 
 export default defineContentScript({
@@ -115,12 +116,15 @@ export default defineContentScript({
         parseText('h1.prod-buy-header__title') ||
         parseMetaContent('og:title');
 
-      const priceString =
-        parseText('.final-price-amount') ||
-        parseMetaContent('og:price:amount') ||
-        parseText('.total-price strong') ||
-        parseText('.prod-price .total-price .value');
-      const salePrice = parseNumber(priceString);
+      // 쿠폰 적용 전 판매가(JSON-LD Offer.price)를 먼저 읽는다.
+      // 화면 혜택가(.final-price-amount)는 사용자 쿠폰이 적용돼 0원이 될 수 있어 마지막 폴백으로 둔다.
+      const vendorItemId = new URLSearchParams(window.location.search).get('vendorItemId');
+      const salePrice =
+        pickOfferPrice(parseJsonLd(), vendorItemId) ??
+        toPositivePrice(parseMetaContent('og:price:amount')) ??
+        toPositivePrice(parseText('.total-price strong')) ??
+        toPositivePrice(parseText('.prod-price .total-price .value')) ??
+        toPositivePrice(parseText('.final-price-amount'));
 
       const shippingText =
         parseText('.prod-shipping-fee .delivery-fee') ||
