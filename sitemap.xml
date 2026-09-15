@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- GitHub Pages(master 브랜치 루트) 기준. Search Console 에 이 주소를 직접 제출한다:
+     https://seongjooon.github.io/sellgentai/sitemap.xml
+     프로젝트 페이지는 호스트 루트가 아니라 robots.txt 로는 사이트맵을 알릴 수 없다. -->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://seongjooon.github.io/sellgentai/</loc>
+    <lastmod>2026-09-15</lastmod>
+  </url>
+  <url>
+    <loc>https://seongjooon.github.io/sellgentai/privacy.html</loc>
+    <lastmod>2026-09-15</lastmod>
+  </url>
+</urlset>

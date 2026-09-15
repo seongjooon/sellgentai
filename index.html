@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sellgent AI - 쿠팡 로켓그로스 마진 계산기 크롬 확장 프로그램</title>
+    <meta name="description"
+        content="쿠팡 상품 페이지에서 로켓그로스 판매수수료, 부가세, 사이즈별 물류비를 반영해 예상 순이익과 마진율을 바로 보여주는 크롬 확장 프로그램입니다. 목표 마진에 맞는 최대 사입가도 계산해요." />
+    <link rel="canonical" href="https://seongjooon.github.io/sellgentai/" />
+    <meta name="robots" content="index, follow" />
+    <link rel="icon" type="image/png" sizes="32x32" href="public/icon/32.png" />
+
+    <!-- Open Graph / 링크 미리보기 -->
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="ko_KR" />
+    <meta property="og:site_name" content="Sellgent AI" />
+    <meta property="og:title" content="Sellgent AI - 쿠팡 로켓그로스 마진 계산기" />
+    <meta property="og:description"
+        content="쿠팡 상품 페이지에서 판매수수료·부가세·물류비를 반영한 예상 순이익과 마진율을 바로 확인하세요." />
+    <meta property="og:url" content="https://seongjooon.github.io/sellgentai/" />
+    <meta property="og:image" content="https://seongjooon.github.io/sellgentai/public/icon/128.png" />
+    <meta name="twitter:card" content="summary" />
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "Sellgent AI - 쿠팡 로켓그로스 마진 계산기",
+      "applicationCategory": "BusinessApplication",
+      "operatingSystem": "Chrome",
+      "description": "쿠팡 상품 페이지에서 로켓그로스 판매수수료, 부가세, 사이즈별 물류비를 반영해 예상 순이익과 마진율을 계산하는 크롬 확장 프로그램",
+      "url": "https://seongjooon.github.io/sellgentai/",
+      "downloadUrl": "https://chromewebstore.google.com/detail/sellgent-ai-%EC%BF%A0%ED%8C%A1-%EB%A1%9C%EC%BC%93%EA%B7%B8%EB%A1%9C%EC%8A%A4-%EB%A7%88%EC%A7%84-%EA%B3%84/dfpmlhjkcdhhffmplnpbfemkjnmaapjd",
+      "image": "https://seongjooon.github.io/sellgentai/public/icon/128.png",
+      "inLanguage": "ko"
+    }
+    </script>
+
+    <style>
+        :root {
+            --bg: #f7f8f7;
+            --card: #ffffff;
+            --text: #1d2521;
+            --muted: #5b6660;
+            --line: #e2e6e3;
+            --brand: #00a86b;
+            --brand-ink: #ffffff;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--text);
+            font-family: -apple-system, BlinkMacSystemFont, system-ui, "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", sans-serif;
+            line-height: 1.65;
+        }
+
+        .wrap {
+            max-width: 880px;
+            margin: 0 auto;
+            padding-inline: 20px;
+        }
+
+        header {
+            padding-block: 56px 40px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 700;
+            color: var(--muted);
+        }
+
+        .brand img {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+        }
+
+        h1 {
+            font-size: clamp(1.75rem, 4vw, 2.5rem);
+            line-height: 1.3;
+            margin: 20px 0 12px;
+        }
+
+        .lead {
+            font-size: 1.1rem;
+            color: var(--muted);
+            margin: 0 0 28px;
+        }
+
+        .cta {
+            display: inline-block;
+            background: var(--brand);
+            color: var(--brand-ink);
+            text-decoration: none;
+            font-weight: 700;
+            padding: 14px 22px;
+            border-radius: 12px;
+        }
+
+        .cta:focus-visible,
+        a:focus-visible {
+            outline: 3px solid #0b6e4f;
+            outline-offset: 3px;
+        }
+
+        section {
+            padding-block: 28px;
+            border-top: 1px solid var(--line);
+        }
+
+        h2 {
+            font-size: 1.35rem;
+            margin: 0 0 16px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 14px;
+            padding: 0;
+            margin: 0;
+            list-style: none;
+        }
+
+        .grid li {
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            padding: 16px;
+        }
+
+        .grid strong {
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        ol.steps {
+            padding-left: 1.3em;
+            margin: 0;
+        }
+
+        ol.steps li {
+            margin-bottom: 8px;
+        }
+
+        dl {
+            margin: 0;
+        }
+
+        dt {
+            font-weight: 700;
+            margin-top: 16px;
+        }
+
+        dd {
+            margin: 4px 0 0;
+            color: var(--muted);
+        }
+
+        footer {
+            padding-block: 32px 48px;
+            border-top: 1px solid var(--line);
+            color: var(--muted);
+            font-size: 0.9rem;
+        }
+
+        footer a {
+            color: inherit;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="wrap">
+        <header>
+            <div class="brand">
+                <img src="public/icon/128.png" alt="" width="40" height="40" />
+                <span>Sellgent AI</span>
+            </div>
+            <h1>쿠팡 로켓그로스 마진 계산기</h1>
+            <p class="lead">
+                쿠팡 상품 페이지에서 아이콘 한 번만 누르면, 로켓그로스 판매수수료·부가세·사이즈별 물류비를 반영한
+                예상 순이익과 마진율을 사이드바에서 바로 확인할 수 있는 크롬 확장 프로그램입니다.
+            </p>
+            <a class="cta"
+                href="https://chromewebstore.google.com/detail/sellgent-ai-%EC%BF%A0%ED%8C%A1-%EB%A1%9C%EC%BC%93%EA%B7%B8%EB%A1%9C%EC%8A%A4-%EB%A7%88%EC%A7%84-%EA%B3%84/dfpmlhjkcdhhffmplnpbfemkjnmaapjd">
+                크롬 웹스토어에서 설치하기
+            </a>
+        </header>
+
+        <main>
+            <section aria-labelledby="features">
+                <h2 id="features">주요 기능</h2>
+                <ul class="grid">
+                    <li><strong>상품 정보 자동 인식</strong>상품명, 판매가, 배송비, 카테고리, 판매자, 평점과 리뷰 수를 페이지에서 읽어옵니다.</li>
+                    <li><strong>카테고리별 판매수수료</strong>카테고리에 맞는 로켓그로스 판매수수료율을 자동으로 적용합니다.</li>
+                    <li><strong>사이즈별 물류비와 부가세</strong>상품 크기 6단계에 따른 입출고·배송비와 부가세 10%를 반영합니다.</li>
+                    <li><strong>순이익·마진율 한눈에</strong>예상 순이익, 마진율, 비용 구성 비율을 색상과 차트로 보여줍니다.</li>
+                    <li><strong>목표 마진과 최대 사입가</strong>목표 마진율을 정하면 그에 맞는 추천 최대 사입가를 알려줍니다.</li>
+                    <li><strong>쿠팡 직매입 상품 경고</strong>쿠팡이 직접 판매하는 상품이면 경쟁이 어렵다고 미리 알려줍니다.</li>
+                </ul>
+            </section>
+
+            <section aria-labelledby="how">
+                <h2 id="how">사용 방법</h2>
+                <ol class="steps">
+                    <li>크롬 웹스토어에서 Sellgent AI를 설치합니다.</li>
+                    <li>쿠팡 상품 페이지를 엽니다.</li>
+                    <li>브라우저 오른쪽 위의 Sellgent AI 아이콘을 누르면 사이드바에 계산 결과가 나타납니다.</li>
+                    <li>원가(사입가)와 상품 크기를 조정하면 순이익과 마진율이 바로 다시 계산됩니다.</li>
+                </ol>
+            </section>
+
+            <section aria-labelledby="faq">
+                <h2 id="faq">자주 묻는 질문</h2>
+                <dl>
+                    <dt>계산에 포함되지 않는 비용이 있나요?</dt>
+                    <dd>보관료, 반품비, 광고비는 자동 계산에 포함되지 않습니다. 계산 결과는 예상치이며, 정확한 금액은 쿠팡 WING 정산 내역을 확인해 주세요.</dd>
+                    <dt>입력한 원가나 계산 결과가 서버로 전송되나요?</dt>
+                    <dd>아니요. 계산은 브라우저 안에서만 처리되고, 계산 기록은 사용자의 브라우저에만 최근 10개까지 저장됩니다.</dd>
+                    <dt>어떤 페이지에서 동작하나요?</dt>
+                    <dd>크롬 브라우저의 쿠팡(coupang.com) 상품 페이지에서 동작합니다.</dd>
+                </dl>
+            </section>
+        </main>
+
+        <footer>
+            <p>
+                <a href="privacy.html">개인정보처리방침</a> ·
+                문의 <a href="mailto:tovvcorp@gmail.com">tovvcorp@gmail.com</a>
+            </p>
+            <p>운영: 토브 (TOVV)</p>
+        </footer>
+    </div>
+</body>
+
+</html>

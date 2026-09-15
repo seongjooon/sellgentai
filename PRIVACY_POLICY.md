@@ -1,6 +1,6 @@
 # 개인정보 처리방침 (Privacy Policy)
 
-**최종 수정일: 2025년 12월**
+**최종 수정일: 2026년 9월**
 
 ---
 
@@ -12,13 +12,24 @@ Sellgent AI는 온라인 셀러를 위한 소싱 상품 분석 확장 프로그�
 
 ## 2. 수집하는 정보
 
-Sellgent AI는 **개인정보를 수집하지 않습니다.**
+Sellgent AI 확장 프로그램은 **개인정보를 수집하지 않습니다.** 단, 사용자가 선택해 참여하는 설문에 입력한 정보는 아래 "선택 참여 설문"에 따라 처리됩니다.
 
 ### 로컬 저장 데이터
 
 - **사용자 설정**: 목표 마진율, 필터 설정, 저장된 상품 목록 등은 브라우저의 localStorage에만 저장됩니다.
 - **계산 데이터**: 모든 마진 계산, 가격 분석은 사용자의 브라우저에서만 수행되며, 외부로 전송되지 않습니다.
 - **상품 정보**: 분석하는 상품의 가격, 카테고리, 이미지 등의 메타데이터는 로컬에서만 처리됩니다.
+- **설문 참여 상태**: 설문 카드를 다시 띄우지 않기 위해 "참여 완료" 또는 "다시 보지 않기" 여부만 localStorage에 저장됩니다.
+
+### 선택 참여 설문 (Google Forms)
+
+- 사이드바에 사용자 설문 카드가 표시될 수 있으며, 참여는 선택입니다.
+- 설문은 운영자가 만든 Google Forms 페이지를 사이드바 안에 불러와 표시합니다. 응답은 Google Forms로 직접 제출되며, 확장 프로그램 코드는 응답 내용을 읽거나 전송하지 않습니다.
+- 저장되는 정보: 설문 응답(운영 기간, 매출 구간, 사용 방식, 의견)과, 인터뷰 참여를 원하는 경우 동의 후 입력한 연락처(이메일 또는 전화번호)
+- 이용 목적: 서비스 개선 및 사용자 인터뷰 안내
+- 보유 기간: 연락처는 인터뷰 종료 후 12개월 이내 파기합니다. 인터뷰를 진행하지 않은 경우 설문 종료 후 12개월 이내 파기합니다.
+- 동의를 거부할 수 있으며, 거부해도 확장 프로그램 이용에는 제한이 없습니다.
+- 설문 페이지의 데이터 처리는 [Google 개인정보처리방침](https://policies.google.com/privacy)을 따릅니다.
 
 ---
 
@@ -122,14 +133,14 @@ Sellgent AI는 다음을 사용하지 않습니다:
 | **회사명** | 토브 (TOVV) |
 | **이메일** | tovvcorp@gmail.com |
 | **웹사이트** | https://www.instagram.com/sellgent.ai/ |
-| **GitHub** | [Issues를 통해 문의](https://github.com/sellgent-ai/issues) |
+| **GitHub** | [Issues를 통해 문의](https://github.com/seongjooon/sellgentai/issues) |
 
 ---
 
 ## 요약
 
-✅ **개인정보 수집**: 없음  
-✅ **외부 서버 전송**: 없음  
+✅ **개인정보 수집**: 확장 프로그램은 수집하지 않음 (선택 참여 설문 응답은 Google Forms에 저장)  
+✅ **외부 서버 전송**: 확장 프로그램 코드는 전송하지 않음  
 ✅ **제3자 공유**: 없음  
 ✅ **추적 기술**: 없음  
 ✅ **완전 로컬 처리**: 모든 데이터 로컬 저장소만 사용  
@@ -140,7 +151,7 @@ Sellgent AI는 사용자의 **프라이버시를 최우선**으로 생각합니�
 
 # Privacy Policy (English)
 
-**Last Updated: January 2025**
+**Last Updated: September 2026**
 
 ---
 
@@ -152,13 +163,24 @@ Sellgent AI is a sourcing product analysis extension for online sellers. This po
 
 ## 2. Information We Collect
 
-Sellgent AI **does not collect any personal information.**
+The Sellgent AI extension **does not collect any personal information.** Information you enter in an optional survey is handled as described in "Optional Survey" below.
 
 ### Local Storage Data
 
 - **User Settings**: Target margin rates, filter settings, and saved product lists are stored only in your browser's localStorage.
 - **Calculation Data**: All margin calculations and price analysis are performed locally in your browser and are not transmitted externally.
 - **Product Information**: Product metadata (price, category, images, etc.) is processed only locally.
+- **Survey Status**: Only whether you completed or dismissed the survey is stored in localStorage, so the survey card is not shown again.
+
+### Optional Survey (Google Forms)
+
+- A user survey card may appear in the sidebar. Participation is optional.
+- The survey is a Google Forms page created by the operator and loaded inside the sidebar. Answers are submitted directly to Google Forms; the extension code does not read or transmit them.
+- Information stored: survey answers (selling period, revenue range, usage, feedback) and, only if you want to join an interview and consent, your contact (email or phone number)
+- Purpose: improving the service and arranging user interviews
+- Retention: contact information is deleted within 12 months after the interview ends, or within 12 months after the survey closes if no interview takes place.
+- You may decline consent; declining does not limit your use of the extension.
+- Data on the survey page is processed under the [Google Privacy Policy](https://policies.google.com/privacy).
 
 ---
 
@@ -262,14 +284,14 @@ If you have questions or concerns about this privacy policy, please contact us:
 | **Company Name** | TOVV |
 | **Email** | tovvcorp@gmail.com |
 | **Website** | https://www.instagram.com/sellgent.ai/ |
-| **GitHub** | [Contact via Issues](https://github.com/sellgent-ai/issues) |
+| **GitHub** | [Contact via Issues](https://github.com/seongjooon/sellgentai/issues) |
 
 ---
 
 ## Summary
 
-✅ **Personal Data Collection**: None  
-✅ **External Server Transmission**: None  
+✅ **Personal Data Collection**: None by the extension (optional survey answers are stored in Google Forms)  
+✅ **External Server Transmission**: None by the extension code  
 ✅ **Third-Party Sharing**: None  
 ✅ **Tracking Technologies**: None  
 ✅ **Local Processing Only**: All data uses local storage  

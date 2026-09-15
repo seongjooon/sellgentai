@@ -15,6 +15,7 @@ import { MarginHero } from './components/MarginHero';
 import { HistoryPanel } from './components/History';
 import { Card, CardHeader, CardContent, Input, Select, Slider, SkeletonCard, Alert } from './components/ui';
 import { ActionCard } from './components/ActionCard';
+import { SurveyCard } from './components/SurveyCard';
 import { getPlainTerm } from './constants/plainLanguage';
 import {
   estimateCost,
@@ -491,6 +492,9 @@ const SidebarApp: React.FC = () => {
             netProfit={calculation.netProfit}
             recommendedMaxCost={recommendedMaxCost}
           />
+
+          {/* 사용자 설문 카드 (설정이 비어 있거나 종료일이 지나면 표시하지 않음) */}
+          <SurveyCard />
 
           {/* 상품 정보 */}
           <Card className="animate-slide-in">

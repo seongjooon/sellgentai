@@ -1,14 +1,14 @@
 {
   "extName": {
-    "message": "Sellgent AI - Rocket Growth Margin Calculator",
-    "description": "Extension name"
+    "message": "Sellgent AI - Coupang Rocket Growth Margin Calculator",
+    "description": "Extension name (Chrome Web Store title, max 75 characters)"
   },
   "extDescription": {
-    "message": "Real-time margin calculator for Coupang Rocket Growth sellers. Automatically calculates fees and logistics costs by category to analyze expected profits.",
-    "description": "Extension description"
+    "message": "See net profit and margin on Coupang product pages, with Rocket Growth category fees, VAT and size-based logistics fees applied.",
+    "description": "Extension description (Chrome Web Store summary, max 132 characters)"
   },
   "actionTitle": {
-    "message": "Sellgent AI - Rocket Growth Margin Calculator",
+    "message": "Sellgent AI - Coupang Rocket Growth Margin Calculator",
     "description": "Action button title"
   }
 }
