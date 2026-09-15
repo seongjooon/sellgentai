@@ -1,14 +1,14 @@
 {
   "extName": {
-    "message": "Sellgent AI - 로켓그로스 마진 계산기",
-    "description": "Extension name"
+    "message": "Sellgent AI - 쿠팡 로켓그로스 마진 계산기",
+    "description": "Extension name (Chrome Web Store 제목, 최대 75자)"
   },
   "extDescription": {
-    "message": "쿠팡 로켓그로스 셀러를 위한 실시간 마진 계산 도구. 카테고리별 수수료와 물류비를 자동으로 계산하여 예상 수익을 분석합니다.",
-    "description": "Extension description"
+    "message": "쿠팡 상품 페이지에서 로켓그로스 판매수수료·부가세·사이즈별 물류비를 자동 반영해 예상 순이익과 마진율을 바로 계산합니다. 목표 마진을 맞추는 최대 사입가도 알려드려요.",
+    "description": "Extension description (Chrome Web Store 요약, 최대 132자)"
   },
   "actionTitle": {
-    "message": "Sellgent AI - 로켓그로스 마진 계산기",
+    "message": "Sellgent AI - 쿠팡 로켓그로스 마진 계산기",
     "description": "Action button title"
   }
 }
