@@ -133,7 +133,7 @@ Sellgent AI는 다음을 사용하지 않습니다:
 | **회사명** | 토브 (TOVV) |
 | **이메일** | tovvcorp@gmail.com |
 | **웹사이트** | https://www.instagram.com/sellgent.ai/ |
-| **GitHub** | [Issues를 통해 문의](https://github.com/sellgent-ai/issues) |
+| **GitHub** | [Issues를 통해 문의](https://github.com/seongjooon/sellgentai/issues) |
 
 ---
 
@@ -284,7 +284,7 @@ If you have questions or concerns about this privacy policy, please contact us:
 | **Company Name** | TOVV |
 | **Email** | tovvcorp@gmail.com |
 | **Website** | https://www.instagram.com/sellgent.ai/ |
-| **GitHub** | [Contact via Issues](https://github.com/sellgent-ai/issues) |
+| **GitHub** | [Contact via Issues](https://github.com/seongjooon/sellgentai/issues) |
 
 ---
 
