@@ -132,7 +132,8 @@ export const CATEGORY_FEE_RATES: Record<string, number> = {
   '모터사이클': 0.076,
   '공구': 0.10,
   '타이어': 0.10,
-  '오일': 0.10,
+  // '오일'은 헤어오일·바디오일·올리브오일 등 다른 카테고리 상품명에 더 흔해 뺐다.
+  // 엔진오일은 '자동차용품' 같은 상위 단계의 '자동차'로 매칭된다.
 
   // 패션/잡화
   '패션': 0.105,
@@ -175,10 +176,14 @@ export const DEFAULT_FEE_RATE = 0.10; // 10%
 const MIN_SUBSTRING_KEYWORD_LENGTH = 2;
 
 /**
- * 두 글자 이상이어도 단계 이름과 정확히 같을 때만 쓰는 키워드.
- * '커피머신', '원두분쇄기' 같은 기기(가전·주방)가 식품 수수료로 잡히지 않게 한다.
+ * 다른 카테고리 상품명에도 흔히 들어가는 일반어.
+ * 부분 일치로 먼저 쓰면 오탐이 나서, 다른 단계에서 아무것도 못 찾았을 때만 쓴다.
+ * - 커피·원두: 커피머신(가전)·원두분쇄기(주방)
+ * - 전자: 전자담배·전자사전 / 디지털: 디지털피아노(악기)
+ * - 렌즈: 콘택트렌즈(뷰티) / 콘솔: 콘솔테이블(가구) / 게임: 보드게임(완구)
+ * - 마사지: 마사지젤(뷰티) / 건강: 건강기능식품(식품) / 벨트: 안전벨트(자동차)
  */
-const EXACT_ONLY_KEYWORDS = new Set(['커피', '원두']);
+const AMBIGUOUS_KEYWORDS = new Set(['커피', '원두', '전자', '디지털', '렌즈', '콘솔', '게임', '마사지', '건강', '벨트']);
 
 /** 비교용 정규화 (앞뒤 공백·내부 공백·괄호 제거, 소문자) */
 function normalizeCategory(value: string): string {
@@ -204,30 +209,42 @@ const NORMALIZED_KEYWORDS = Object.keys(CATEGORY_FEE_RATES).map((keyword) => ({
 }));
 
 /**
+ * 카테고리 한 단계에서 키워드 찾기
+ * 1) 단계 이름과 정확히 같은 키워드
+ * 2) 두 글자 이상 키워드의 부분 일치 중 가장 긴 키워드 ('건강식품'이 '건강'보다 우선)
+ */
+function matchToken(token: string, allowAmbiguous: boolean): string | null {
+  const usable = NORMALIZED_KEYWORDS.filter(
+    ({ keyword }) => allowAmbiguous || !AMBIGUOUS_KEYWORDS.has(keyword),
+  );
+
+  const exact = usable.find(({ normalized }) => normalized === token);
+  if (exact) return exact.keyword;
+
+  let longest: (typeof NORMALIZED_KEYWORDS)[number] | null = null;
+  for (const entry of usable) {
+    const length = [...entry.normalized].length;
+    if (length < MIN_SUBSTRING_KEYWORD_LENGTH || !token.includes(entry.normalized)) continue;
+    if (!longest || length > [...longest.normalized].length) longest = entry;
+  }
+  return longest?.keyword ?? null;
+}
+
+/**
  * 카테고리 경로에서 수수료 키워드 찾기
  *
- * 더 구체적인 뒤쪽 단계부터 본다. 한 단계 안에서는
- * 1) 단계 이름과 정확히 같은 키워드
- * 2) 두 글자 이상 키워드의 부분 일치 중 가장 긴 키워드 (예: '건강식품'이 '건강'보다 우선)
- * 순서로 고른다.
+ * 1차: 일반어를 뺀 키워드로 구체적인(뒤쪽) 단계부터 찾는다.
+ *      '뷰티 > 헤어케어 > 헤어오일' 처럼 상위 단계가 있으면 그쪽으로 매칭된다.
+ * 2차: 1차에서 못 찾으면 일반어까지 포함해 다시 찾는다. ('게임기 → 게임' 유지)
  */
 function findCategoryKeyword(categories: string[]): string | null {
   const tokens = getCategoryTokens(categories || []);
 
-  for (let i = tokens.length - 1; i >= 0; i--) {
-    const token = tokens[i];
-
-    const exact = NORMALIZED_KEYWORDS.find(({ normalized }) => normalized === token);
-    if (exact) return exact.keyword;
-
-    let longest: (typeof NORMALIZED_KEYWORDS)[number] | null = null;
-    for (const entry of NORMALIZED_KEYWORDS) {
-      const length = [...entry.normalized].length;
-      if (length < MIN_SUBSTRING_KEYWORD_LENGTH || EXACT_ONLY_KEYWORDS.has(entry.keyword)) continue;
-      if (!token.includes(entry.normalized)) continue;
-      if (!longest || length > [...longest.normalized].length) longest = entry;
+  for (const allowAmbiguous of [false, true]) {
+    for (let i = tokens.length - 1; i >= 0; i--) {
+      const matched = matchToken(tokens[i], allowAmbiguous);
+      if (matched) return matched;
     }
-    if (longest) return longest.keyword;
   }
 
   return null;
