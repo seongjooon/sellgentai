@@ -33,9 +33,10 @@
   --color-bg-elevated-light: #FFFFFF;
   --color-bg-card-light: #FFFFFF;
 
-  --color-text-primary-light: #1A1D1F;
-  --color-text-secondary-light: #6C757D;
-  --color-text-tertiary-light: #ADB5BD;
+  /* 흰 배경 대비 WCAG AA(4.5:1) 이상이 되도록 보조 텍스트를 진하게 잡는다 */
+  --color-text-primary-light: #1A1D1F;   /* 16.9:1 */
+  --color-text-secondary-light: #495057; /* 8.2:1 (이전 #6C757D 4.7:1) */
+  --color-text-tertiary-light: #6C757D;  /* 4.7:1 (이전 #ADB5BD 2.1:1) */
 
   --color-border-light-mode: #DEE2E6;
   --color-border-light-elevated: #CED4DA;
@@ -286,6 +287,11 @@
     --color-border: var(--color-border-light-mode);
     --color-border-light: var(--color-border-light-elevated);
 
+    /* 브랜드 색은 흰 배경에서 너무 밝아 글자가 안 보인다. 라이트모드에서만 어둡게 */
+    --color-brand-primary: #00875A;  /* 4.6:1 (이전 #00D084 2.0:1), 흰 글씨 버튼도 4.6:1 */
+    --color-brand-warning: #A05E00;  /* 5.1:1 (이전 #FFB84D 1.7:1) */
+    --color-brand-danger: #D92D20;   /* 4.8:1 (이전 #FF3B30 3.6:1) */
+
     background: linear-gradient(135deg, #FFFFFF 0%, #F8F9FA 100%);
   }
 
@@ -298,4 +304,39 @@
     );
     background-size: 200% 100%;
   }
+}
+
+/* ============================================
+   Light Mode Contrast Overrides
+   레이어 밖에 두어 Tailwind utilities 보다 나중에 적용되게 한다
+   ============================================ */
+
+body.light-mode .text-gradient-primary {
+  /* background 단축 속성을 쓰면 background-clip: text 가 초기화돼 글자가 덩어리로 보인다 */
+  background-image: linear-gradient(135deg, #00875A, #00A86B);
+}
+
+body.light-mode .text-gradient-warning {
+  background-image: linear-gradient(135deg, #A05E00, #C27A00);
+}
+
+body.light-mode .text-gradient-danger {
+  background-image: linear-gradient(135deg, #D92D20, #E5544A);
+}
+
+body.light-mode .gauge-fill-primary {
+  background-image: linear-gradient(90deg, #00875A, #00A86B);
+}
+
+body.light-mode .gauge-fill-warning {
+  background-image: linear-gradient(90deg, #A05E00, #C27A00);
+}
+
+body.light-mode .gauge-fill-danger {
+  background-image: linear-gradient(90deg, #D92D20, #E5544A);
+}
+
+body.light-mode .skeleton-bg {
+  background-image: linear-gradient(90deg, #F1F3F5 25%, #E9ECEF 50%, #F1F3F5 75%);
+  background-size: 200% 100%;
 }
