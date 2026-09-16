@@ -187,7 +187,8 @@ const SidebarApp: React.FC = () => {
   const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
     // localStorage에서 다크모드 설정 불러오기
     const saved = localStorage.getItem('isDarkMode');
-    return saved ? saved === 'true' : false; // 기본값 false (라이트모드 ON)
+    // 기본값 true (다크모드 ON). app.css 의 기본 토큰도 다크라 첫 렌더에서 깜빡임이 없다.
+    return saved ? saved === 'true' : true;
   });
 
   // 초보 모드에 따라 용어 표시
