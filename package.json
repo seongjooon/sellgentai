@@ -13,6 +13,8 @@
     "zip:firefox": "wxt zip -b firefox",
     "compile": "tsc --noEmit",
     "test:category": "node --experimental-strip-types --no-warnings scripts/verify-category.mjs",
+    "test:fees": "node --experimental-strip-types --no-warnings scripts/feeCalculator.test.mjs",
+    "test": "npm run test:category && npm run test:fees",
     "postinstall": "wxt prepare"
   },
   "dependencies": {
