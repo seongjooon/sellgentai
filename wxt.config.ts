@@ -9,7 +9,7 @@ export default defineConfig({
     // 스토어 목록·검색에 쓰이는 이름과 요약은 public/_locales/{ko,en}/messages.json 에서 언어별로 관리한다
     name: '__MSG_extName__',
     description: '__MSG_extDescription__',
-    version: '1.2.2',
+    version: '1.2.3',
     default_locale: 'ko',
     permissions: ['activeTab'],
     host_permissions: ['*://*.coupang.com/*'],
