@@ -1,7 +1,7 @@
 # Chrome Web Store 등록 정보 (SEO)
 
-- 작성일: 2026-09-15
-- 대상 버전: 1.2.1
+- 작성일: 2026-09-15 (갱신: 2026-09-23)
+- 대상 버전: 1.2.3
 - 스토어 ID: `dfpmlhjkcdhhffmplnpbfemkjnmaapjd`
 
 ## 원칙 (공식 가이드 근거)
