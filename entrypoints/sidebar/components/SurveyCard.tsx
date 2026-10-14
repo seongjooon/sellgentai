@@ -58,26 +58,27 @@ export const SurveyCard: React.FC = () => {
     >
       <div className="w-full max-w-[320px]" onClick={(event) => event.stopPropagation()}>
         <Card variant="info" className="max-h-[88vh] overflow-y-auto bg-bg-card shadow-lg">
-          <CardHeader icon="📝" title="1분 설문에 참여해 주세요" />
+          <CardHeader icon="📝" title="셀러님, 정말 잠깐만 도와주세요." />
           <CardContent>
             {!isOpen ? (
               <>
                 <p className="text-sm text-text-secondary">
-                  로켓그로스 셀러에게 꼭 필요한 도구로 만들기 위해 실제 사용자 의견을 듣고 있어요.
-                  모든 문항은 선택이에요.
+                  저희가 혼자 짐작하며 만들고 싶지 않습니다.<br />
+                  실제로 판매하시는 셀러님이 어떤 순간에 막히고, 무엇이 가장 아쉬운지 듣고 싶어요.<br />
+                  딱 1분만 들려주시면 다음 개선에 꼭 반영하겠습니다.
                 </p>
                 <div className="flex gap-2">
                   <button
                     onClick={() => setIsOpen(true)}
                     className="flex-1 px-4 py-2 text-sm font-semibold rounded-lg bg-brand-primary text-white hover:opacity-90 transition-opacity"
                   >
-                    설문 참여하기
+                    1분만 참여하기
                   </button>
                   <button
                     onClick={() => setIsSnoozed(true)}
                     className="px-4 py-2 text-sm font-semibold rounded-lg border border-border bg-bg-card text-text-secondary hover:text-text-primary transition-colors"
                   >
-                    나중에
+                    나중에 할게요
                   </button>
                 </div>
                 <button
